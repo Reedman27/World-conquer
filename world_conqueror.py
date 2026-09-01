@@ -1059,6 +1059,8 @@ class Game:
                 defender.alive = False
                 if verbose:
                     print(c(f"   \U0001F480 {defender.flag} {defender.name} has been eliminated!", Col.RED, Col.BOLD))
+                self.log_history(f"\U0001F480 {defender.flag} {defender.name} was eliminated by "
+                                  f"{attacker.flag} {attacker.name}.")
             elif not verbose:
                 self.world_events_buffer.append(
                     f"{attacker.flag} {attacker.short_name} conquered {territory_name} from {defender.flag} {defender.short_name}")
@@ -1345,8 +1347,11 @@ class Game:
         for cnt in self.countries.values():
             if cnt is not attacker:
                 self.grudges[cnt.name][attacker.name] += 20  # world is horrified
+        self.log_history(f"\u2622 {attacker.flag} {attacker.name} launched a nuclear strike on "
+                          f"{defender.flag} {defender.name}.")
         if not defender.territory or defender.population <= 0:
             defender.alive = False
+            self.log_history(f"\U0001F480 {defender.flag} {defender.name} was destroyed in the nuclear strike.")
         self.cleanup_after_change()
         return True
 
@@ -1540,6 +1545,8 @@ class Game:
             "player_intel": self.player_intel,
             "econ_streak": self.econ_streak,
             "alliance_streak": self.alliance_streak,
+            "history": self.history,
+            "event_cooldowns": self.event_cooldowns,
         }
         with open(filename, "w") as f:
             json.dump(data, f)
@@ -1563,10 +1570,11 @@ class Game:
         self.player_intel = data["player_intel"]
         self.econ_streak = data.get("econ_streak", 0)
         self.alliance_streak = data.get("alliance_streak", 0)
+        self.history = [tuple(x) for x in data.get("history", [])]
+        self.event_cooldowns = data.get("event_cooldowns", {})
         print(c(f"Game loaded from {filename}. Welcome back, leader of {self.player.name}.", Col.GREEN))
         return True
 
-    # -- main loop ----------------------------------------------------------------
     # -- politics / ideology --------------------------------------------------
     def process_politics(self, country):
         for ideo in IDEOLOGIES:
@@ -1978,11 +1986,14 @@ class Game:
         print(c("""
 World Conqueror — quick guide
 
-  Overview  - View your stats, world standings, and diplomatic relationships
+  Overview  - View your stats, world standings, diplomatic relationships,
+              the world power ranking, and the history log
   Military  - Attack a single territory, launch a Continental Offensive against
               every reachable territory on one continent at once, build units,
               or launch a nuke
   Diplomacy - Propose alliances / pacts, or merge with an ally into one nation
+  Politics  - View your ideology support and leader, campaign for your own
+              ideology, or suppress a rival one
   Research  - Spend research points on techs, or convert resources into RP
   Espionage - Spy on a rival for intel, or attempt sabotage
   System    - Save your game, view this help, or exit
@@ -1997,6 +2008,15 @@ spare resources into more. Research Institutes and Advanced Research Labs
 boost your RP income further. Nukes require the 'Nuclear Program' tech
 (Research menu) before you can build one, and ICBM tech before you can
 launch one without a navy nearby.
+
+Every nation has a government ideology (Democracy, Communism, Fascism,
+Monarchism, or Neutral) and a support percentage for each ideology. Low
+stability lets rival ideologies grow. Democracies can peacefully vote in a
+new government via elections; unstable nations risk a coup. If a rival
+ideology gets far enough ahead while stability collapses, the nation can
+fracture in a civil war, splitting off a breakaway rebel nation you'll need
+to deal with. Occasional decision events will ask you to choose how to
+respond to political and economic crises.
 
 Country abbreviations are shown in the 'Abbr' column of any table — you can
 type either the full name or the abbreviation when choosing a country. You
