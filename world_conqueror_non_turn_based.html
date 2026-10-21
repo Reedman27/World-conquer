@@ -1,0 +1,2461 @@
+<!--
+  World Conqueror — made by Reedman27
+  https://github.com/Reedman27/World-conquer
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="author" content="Reedman27">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>World Conqueror — by Reedman27</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;500;600;700&family=Spectral+SC:wght@600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b0f0c;
+    --bg-2:#0f1512;
+    --panel:#131a16;
+    --panel-2:#161f1a;
+    --border:#2a352d;
+    --border-soft:#1e2622;
+    --text:#dfe6de;
+    --text-dim:#aab6ac;
+    --muted:#748077;
+    --accent:#c9a24b;
+    --accent-dim:#8f7738;
+    --green:#7ba982;
+    --red:#bd5b4f;
+    --blue:#6f95ab;
+    --purple:#a487ad;
+    --font-display:'Spectral', Georgia, serif;
+    --font-caps:'Spectral SC', Georgia, serif;
+    --font-mono:'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      --bg:#efece2;
+      --bg-2:#e9e5d8;
+      --panel:#f7f4ea;
+      --panel-2:#f1ede0;
+      --border:#c9c2ac;
+      --border-soft:#d8d2bd;
+      --text:#232620;
+      --text-dim:#4c5346;
+      --muted:#7a8172;
+      --accent:#8a6a20;
+      --accent-dim:#a9863a;
+      --green:#3f7a4c;
+      --red:#a3392c;
+      --blue:#3a6a82;
+      --purple:#75567e;
+    }
+  }
+  :root[data-theme="light"]{
+    --bg:#efece2;
+    --bg-2:#e9e5d8;
+    --panel:#f7f4ea;
+    --panel-2:#f1ede0;
+    --border:#c9c2ac;
+    --border-soft:#d8d2bd;
+    --text:#232620;
+    --text-dim:#4c5346;
+    --muted:#5a6154;
+    --accent:#8a6a20;
+    --accent-dim:#a9863a;
+    --green:#3f7a4c;
+    --red:#a3392c;
+    --blue:#3a6a82;
+    --purple:#75567e;
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--font-mono);
+    font-size:14px;
+    line-height:1.5;
+    min-height:100vh;
+  }
+  ::selection{ background:var(--accent); color:#1a1a1a; }
+
+  .wrap{ max-width:1180px; margin:0 auto; padding:22px 16px 64px; }
+
+  /* ---------- Banner ---------- */
+  .banner{
+    display:flex; align-items:baseline; justify-content:space-between;
+    flex-wrap:wrap; gap:10px;
+    border-bottom:1px solid var(--border);
+    padding-bottom:14px; margin-bottom:20px;
+  }
+  .banner h1{
+    font-family:var(--font-caps);
+    font-weight:600;
+    font-size:28px;
+    letter-spacing:0.06em;
+    margin:0;
+    color:var(--accent);
+  }
+  .banner .sub{ color:var(--muted); font-size:12.5px; }
+  .banner .turnbox{
+    font-family:var(--font-mono);
+    font-size:12.5px;
+    color:var(--text-dim);
+    text-align:right;
+  }
+  .banner .turnbox b{ color:var(--text); font-weight:600; }
+  .speed-row{ display:flex; gap:4px; justify-content:flex-end; margin-top:6px; }
+  .spd{ font-family:var(--font-mono); font-size:12px; padding:3px 10px; background:var(--panel); color:var(--text-dim); border:1px solid var(--border); cursor:pointer; }
+  .spd:hover{ border-color:var(--accent); color:var(--accent); }
+  .spd.selected{ border-color:var(--accent); color:var(--accent); background:var(--panel-2); }
+  .act-btn .cd{ display:block; font-size:10px; color:var(--muted); min-height:13px; }
+
+  /* ---------- Setup screen ---------- */
+  .lede{
+    font-family:var(--font-display);
+    font-size:17px;
+    color:var(--text-dim);
+    max-width:62ch;
+    margin:0 0 26px;
+  }
+  .lede em{ color:var(--accent); font-style:normal; }
+
+  .diff-row{ display:flex; gap:10px; margin-bottom:28px; flex-wrap:wrap; }
+  .diff-btn{
+    flex:1; min-width:150px;
+    background:var(--panel); border:1px solid var(--border);
+    color:var(--text); padding:14px 16px; text-align:left;
+    cursor:pointer; font-family:var(--font-mono);
+  }
+  .diff-btn .name{ font-family:var(--font-display); font-size:16px; color:var(--accent); display:block; margin-bottom:4px;}
+  .diff-btn .desc{ color:var(--text-dim); font-size:12px; }
+  .diff-btn:hover{ border-color:var(--accent); }
+  .diff-btn.selected{ border-color:var(--accent); background:var(--panel-2); box-shadow:inset 0 0 0 1px var(--accent); }
+
+  .section-label{
+    font-family:var(--font-display); font-style:italic;
+    color:var(--muted); font-size:13px; margin:0 0 12px;
+    border-bottom:1px solid var(--border-soft); padding-bottom:8px;
+  }
+
+  .country-grid{
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr));
+    gap:10px; margin-bottom:24px;
+  }
+  .country-card{
+    background:var(--panel); border:1px solid var(--border);
+    padding:12px 13px; cursor:pointer; text-align:left;
+    font-family:var(--font-mono); color:var(--text);
+  }
+  .country-card:hover{ border-color:var(--accent); }
+  .country-card .row1{ display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+  .country-card .flag{ font-size:20px; }
+  .country-card .cname{ font-family:var(--font-display); font-size:15px; }
+  .country-card .stat-line{ font-size:11.5px; color:var(--text-dim); display:flex; justify-content:space-between; }
+
+  .start-hint{ color:var(--muted); font-size:12.5px; margin-top:-8px; margin-bottom:20px;}
+
+  /* ---------- Game layout ---------- */
+  .game-grid{ display:grid; grid-template-columns:280px 1fr; gap:16px; }
+  @media (max-width:760px){ .game-grid{ grid-template-columns:1fr; } }
+
+  .panel{ background:var(--panel); border:1px solid var(--border); padding:16px; }
+  .panel + .panel{ margin-top:16px; }
+  .panel h2{
+    font-family:var(--font-display); font-weight:600; font-size:14px;
+    color:var(--accent); margin:0 0 12px; letter-spacing:0.02em;
+  }
+
+  .stat-table{ width:100%; border-collapse:collapse; font-size:12.5px; }
+  .stat-table td{ padding:3px 0; vertical-align:top; }
+  .stat-table td:first-child{ color:var(--muted); width:40%; padding-right:8px; }
+  .stat-table td:last-child{ color:var(--text); }
+  .unit-chip{ display:inline-block; margin-right:8px; color:var(--text-dim); }
+  .unit-chip b{ color:var(--text); }
+
+  .log{
+    background:var(--bg-2); border:1px solid var(--border-soft);
+    height:360px; overflow-y:auto; padding:12px 14px;
+    font-size:12.8px; line-height:1.65;
+  }
+  .log p{ margin:0 0 7px; }
+  .log .t-info{ color:var(--text-dim); }
+  .log .t-good{ color:var(--green); }
+  .log .t-bad{ color:var(--red); }
+  .log .t-warn{ color:var(--accent); }
+  .log .t-note{ color:var(--blue); }
+  .log .t-head{ color:var(--purple); font-weight:600; }
+  .log hr{ border:none; border-top:1px dashed var(--border-soft); margin:10px 0; }
+
+  .action-grid{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:14px;
+  }
+  @media (max-width:500px){ .action-grid{ grid-template-columns:repeat(2,1fr); } }
+  .act-btn{
+    background:var(--panel-2); border:1px solid var(--border);
+    color:var(--text); padding:10px 6px; cursor:pointer;
+    font-family:var(--font-mono); font-size:12px; text-align:center;
+  }
+  .act-btn:hover:not(:disabled){ border-color:var(--accent); color:var(--accent); }
+  .act-btn:disabled{ opacity:0.35; cursor:not-allowed; }
+  .act-btn .k{ display:block; font-size:15px; margin-bottom:3px; }
+
+  .drawer{
+    margin-top:14px; border:1px solid var(--accent-dim); background:var(--panel-2);
+    padding:14px 16px;
+  }
+  .drawer h3{ margin:0 0 10px; font-family:var(--font-display); font-size:14.5px; color:var(--accent);}
+  .drawer p.hint{ color:var(--muted); font-size:11.5px; margin:0 0 10px; }
+  .target-list{ display:flex; flex-direction:column; gap:6px; max-height:260px; overflow-y:auto; }
+  .target-row{
+    display:flex; justify-content:space-between; align-items:center; gap:10px;
+    background:var(--panel); border:1px solid var(--border); padding:8px 10px; cursor:pointer;
+  }
+  .target-row:hover{ border-color:var(--accent); }
+  .target-row .l{ display:flex; gap:8px; align-items:center; }
+  .target-row .r{ color:var(--text-dim); font-size:11.5px; }
+  .target-row.disabled{ opacity:0.4; cursor:not-allowed; }
+
+  .row-inline{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:10px; }
+  .row-inline input[type=number]{
+    width:80px; background:var(--bg-2); border:1px solid var(--border);
+    color:var(--text); font-family:var(--font-mono); padding:6px 8px;
+  }
+  .btn{
+    background:var(--accent); color:#191510; border:none;
+    padding:8px 14px; font-family:var(--font-mono); font-weight:600;
+    cursor:pointer; font-size:12.5px;
+  }
+  .btn:hover{ filter:brightness(1.08); }
+  .btn.ghost{ background:transparent; color:var(--text-dim); border:1px solid var(--border); font-weight:400; }
+  .btn.ghost:hover{ color:var(--text); border-color:var(--accent); }
+  .btn.danger{ background:var(--red); color:#fff; }
+  .btn:disabled{ opacity:0.4; cursor:not-allowed; }
+
+  .tech-row{
+    border:1px solid var(--border); padding:8px 10px; margin-bottom:6px;
+    display:flex; justify-content:space-between; align-items:center; gap:10px; cursor:pointer;
+  }
+  .tech-row:hover:not(.locked){ border-color:var(--accent); }
+  .tech-row.locked{ opacity:0.4; cursor:not-allowed; }
+  .tech-row.done{ opacity:0.5; border-style:dashed; cursor:default; }
+  .tech-row .tn{ font-family:var(--font-display); font-size:13.5px; }
+  .tech-row .td{ color:var(--muted); font-size:11px; }
+  .tech-row .tc{ color:var(--accent); font-size:12px; white-space:nowrap; }
+
+  .worldtable{ width:100%; border-collapse:collapse; font-size:12px; margin-top:4px; }
+  .worldtable th{ text-align:left; color:var(--muted); font-weight:500; padding:4px 6px; border-bottom:1px solid var(--border); }
+  .worldtable td{ padding:4px 6px; border-bottom:1px solid var(--border-soft); }
+  .worldtable tr.me td{ color:var(--accent); }
+
+  .overlay{
+    position:fixed; inset:0; background:rgba(5,7,5,0.72);
+    display:flex; align-items:center; justify-content:center; z-index:50; padding:20px;
+  }
+  .modal{
+    background:var(--panel); border:1px solid var(--accent-dim);
+    max-width:440px; width:100%; padding:24px;
+  }
+  .modal h3{ margin:0 0 10px; font-family:var(--font-display); font-size:18px; color:var(--accent); }
+  .modal p{ color:var(--text-dim); font-size:13px; margin:0 0 18px; }
+  .modal .btnrow{ display:flex; gap:10px; }
+
+  .end-screen{ text-align:center; padding:50px 20px; }
+  .end-screen .big{ font-family:var(--font-display); font-size:30px; margin-bottom:10px; }
+  .end-screen .big.win{ color:var(--green); }
+  .end-screen .big.lose{ color:var(--red); }
+  .end-screen p{ color:var(--text-dim); max-width:50ch; margin:0 auto 22px; }
+
+  .footer-note{ color:var(--muted); font-size:11px; margin-top:26px; text-align:center; }
+
+  .byline{ font-family:var(--font-mono); font-size:11px; letter-spacing:.08em; color:var(--accent-dim); margin:2px 0 4px; text-transform:uppercase; }
+  .credit{ color:var(--muted); font-size:11px; margin-top:26px; text-align:center; font-family:var(--font-mono); }
+  .credit b{ color:var(--accent); font-weight:600; }
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ============================== DATA ============================== */
+
+const COUNTRIES_DATA = {
+  "United States": {short:"US", flag:"🇺🇸", pop:330000000, res:100, mil:70, nukes:10},
+  "Canada":        {short:"CA", flag:"🇨🇦", pop:38000000,  res:80,  mil:40},
+  "Mexico":        {short:"MX", flag:"🇲🇽", pop:128000000, res:60,  mil:30},
+  "France": {short:"FR", flag:"🇫🇷", pop:65000000, res:75, mil:50, nukes:3},
+  "Germany":       {short:"DE", flag:"🇩🇪", pop:83000000,  res:90,  mil:60},
+  "Japan":         {short:"JP", flag:"🇯🇵", pop:125000000, res:85,  mil:55},
+  "Brazil":        {short:"BR", flag:"🇧🇷", pop:214000000, res:70,  mil:45},
+  "India":         {short:"IN", flag:"🇮🇳", pop:1400000000,res:75,  mil:65},
+  "China": {short:"CN", flag:"🇨🇳", pop:1450000000, res:95, mil:80, nukes:3},
+  "Russia": {short:"RU", flag:"🇷🇺", pop:148000000, res:95, mil:90, nukes:15},
+  "Australia":     {short:"AU", flag:"🇦🇺", pop:26000000,  res:80,  mil:35},
+  "United Kingdom": {short:"UK", flag:"🇬🇧", pop:67000000, res:85, mil:55, nukes:2},
+  "Italy":         {short:"IT", flag:"🇮🇹", pop:59000000,  res:70,  mil:45},
+  "Spain":         {short:"ES", flag:"🇪🇸", pop:47000000,  res:65,  mil:40},
+  "South Korea":   {short:"KR", flag:"🇰🇷", pop:52000000,  res:80,  mil:55},
+  "North Korea":   {short:"KP", flag:"🇰🇵", pop:26000000,  res:40,  mil:50},
+  "Indonesia":     {short:"ID", flag:"🇮🇩", pop:275000000, res:65,  mil:40},
+  "Saudi Arabia":  {short:"SA", flag:"🇸🇦", pop:36000000,  res:85,  mil:50},
+  "Iran":          {short:"IR", flag:"🇮🇷", pop:88000000,  res:60,  mil:55},
+  "Turkey":        {short:"TR", flag:"🇹🇷", pop:85000000,  res:65,  mil:55},
+  "Egypt":         {short:"EG", flag:"🇪🇬", pop:105000000, res:55,  mil:45},
+  "South Africa":  {short:"ZA", flag:"🇿🇦", pop:60000000,  res:60,  mil:35},
+  "Nigeria":       {short:"NG", flag:"🇳🇬", pop:220000000, res:50,  mil:35},
+  "Argentina":     {short:"AR", flag:"🇦🇷", pop:46000000,  res:60,  mil:30},
+  "Poland":        {short:"PL", flag:"🇵🇱", pop:38000000,  res:60,  mil:40},
+  "Ukraine": {short:"UA", flag:"🇺🇦", pop:52000000, res:45, mil:45},
+  "Netherlands":   {short:"NL", flag:"🇳🇱", pop:17000000,  res:70,  mil:30},
+  "Sweden":        {short:"SE", flag:"🇸🇪", pop:10000000,  res:80,  mil:45},
+  "Israel": {short:"IL", flag:"🇮🇱", pop:9000000, res:55, mil:35, nukes:1},
+  "Pakistan":      {short:"PK", flag:"🇵🇰", pop:240000000, res:50,  mil:50},
+  "Vietnam":       {short:"VN", flag:"🇻🇳", pop:98000000,  res:50,  mil:35},
+  "Thailand":      {short:"TH", flag:"🇹🇭", pop:72000000,  res:55,  mil:30},
+  "Belarus":      {short:"BY", flag:"🇧🇾", pop:10200000,  res:40,  mil:25},
+  "Kazakhstan":    {short:"KZ", flag:"🇰🇿", pop:16800000,  res:45,  mil:25},
+  "Uzbekistan":    {short:"UZ", flag:"🇺🇿", pop:20900000,  res:35,  mil:20},
+  "Turkmenistan":  {short:"TM", flag:"🇹🇲", pop:3700000,   res:30,  mil:10},
+  "Tajikistan":    {short:"TJ", flag:"🇹🇯", pop:5300000,   res:20,  mil:10},
+  "Kyrgyzstan":    {short:"KG", flag:"🇰🇬", pop:4400000,   res:20,  mil:8},
+  "Georgia":       {short:"GE", flag:"🇬🇪", pop:5400000,   res:25,  mil:12},
+  "Armenia":       {short:"AM", flag:"🇦🇲", pop:3400000,   res:22,  mil:12},
+  "Azerbaijan":    {short:"AZ", flag:"🇦🇿", pop:7200000,   res:30,  mil:15},
+  "Moldova":       {short:"MD", flag:"🇲🇩", pop:4400000,   res:18,  mil:8},
+  "Lithuania":     {short:"LT", flag:"🇱🇹", pop:3700000,   res:25,  mil:10},
+  "Latvia":        {short:"LV", flag:"🇱🇻", pop:2700000,   res:25,  mil:8},
+  "Estonia":       {short:"EE", flag:"🇪🇪", pop:1600000,   res:22,  mil:6},
+};
+
+const ADJACENCY_EDGES = [
+  ["United States","Canada"],["United States","Mexico"],["Mexico","Brazil"],
+  ["Brazil","Argentina"],["France","Germany"],["France","United Kingdom"],
+  ["France","Spain"],["France","Italy"],["Germany","Russia"],["Germany","Poland"],
+  ["Germany","Netherlands"],["Poland","Ukraine"],["Sweden","Germany"],
+  ["Russia","China"],["Russia","India"],["Russia","Ukraine"],["Russia","North Korea"],
+  ["China","India"],["China","Japan"],["China","North Korea"],["China","Vietnam"],
+  ["China","Pakistan"],["India","Pakistan"],["North Korea","South Korea"],
+  ["South Korea","Japan"],["Indonesia","Vietnam"],["Indonesia","Australia"],
+  ["Vietnam","Thailand"],["Thailand","Indonesia"],["Pakistan","Iran"],
+  ["Iran","Turkey"],["Iran","Saudi Arabia"],["Turkey","Ukraine"],["Turkey","Egypt"],
+  ["Saudi Arabia","Egypt"],["Egypt","Israel"],["South Africa","Nigeria"],
+  /* post-Soviet states */
+  ["Russia","Belarus"],["Russia","Kazakhstan"],["Russia","Estonia"],["Russia","Latvia"],["Russia","Lithuania"],
+  ["Russia","Georgia"],["Russia","Azerbaijan"],
+  ["Belarus","Poland"],["Belarus","Ukraine"],["Belarus","Lithuania"],["Belarus","Latvia"],
+  ["Lithuania","Poland"],["Lithuania","Latvia"],["Latvia","Estonia"],["Moldova","Ukraine"],
+  ["Georgia","Armenia"],["Georgia","Azerbaijan"],["Georgia","Turkey"],["Armenia","Turkey"],
+  ["Armenia","Azerbaijan"],["Armenia","Iran"],["Azerbaijan","Iran"],
+  ["Kazakhstan","China"],["Kazakhstan","Uzbekistan"],["Kazakhstan","Kyrgyzstan"],["Kazakhstan","Turkmenistan"],
+  ["Uzbekistan","Turkmenistan"],["Uzbekistan","Tajikistan"],["Uzbekistan","Kyrgyzstan"],
+  ["Tajikistan","Kyrgyzstan"],["Tajikistan","China"],["Kyrgyzstan","China"],["Turkmenistan","Iran"],
+];
+
+const RANDOM_EVENTS = [
+  ["Bumper Harvest","res",15,"Good harvests boost {n}'s resources."],
+  ["Economic Boom","res",20,"An economic boom fills {n}'s coffers."],
+  ["Natural Disaster","res",-15,"A natural disaster drains {n}'s resources."],
+  ["Military Parade","infantry",5,"A show of force raises {n}'s infantry ranks."],
+  ["Civil Unrest","res",-10,"Civil unrest disrupts {n}'s economy."],
+  ["Trade Deal Signed","res",10,"A lucrative trade deal boosts {n}'s resources."],
+  ["Tech Breakthrough","air",3,"A technological breakthrough grows {n}'s air force."],
+  ["Naval Expansion","navy",3,"A shipbuilding drive grows {n}'s navy."],
+];
+
+/* Formable nations: hold every required territory and you can proclaim the larger state. */
+const FORMABLES = [
+  {id:"ussr", name:"Soviet Union", short:"SU", flag:"☭",
+   needs:["Russia","Ukraine","Belarus","Kazakhstan","Uzbekistan","Turkmenistan","Tajikistan","Kyrgyzstan","Georgia","Armenia","Azerbaijan","Moldova","Lithuania","Latvia","Estonia"]},
+  {id:"eu", name:"European Union", short:"EU", flag:"🇪🇺", needs:["France","Germany","Italy","Spain","Netherlands","Poland","Sweden"]},
+  {id:"turkestan", name:"Turkestan", short:"TKS", flag:"🏜️", needs:["Kazakhstan","Uzbekistan","Turkmenistan","Tajikistan","Kyrgyzstan"]},
+  {id:"eastasia", name:"East Asian Union", short:"EAU", flag:"🏯", needs:["China","Japan","South Korea","North Korea"]},
+  {id:"anglo", name:"Anglosphere Federation", short:"ANG", flag:"🦅", needs:["United States","United Kingdom","Canada","Australia"]},
+  {id:"ottoman", name:"Ottoman Empire", short:"OTT", flag:"🌙", needs:["Turkey","Egypt","Saudi Arabia","Israel"]},
+  {id:"plc", name:"Polish–Lithuanian Commonwealth", short:"PLC", flag:"🛡️", needs:["Poland","Lithuania","Belarus","Ukraine"]},
+  {id:"nau", name:"North American Union", short:"NAU", flag:"🌎", needs:["United States","Canada","Mexico"]},
+  {id:"seasia", name:"Southeast Asian Union", short:"SEA", flag:"🌴", needs:["Vietnam","Thailand","Indonesia"]},
+  {id:"baltic", name:"Baltic Union", short:"BAL", flag:"⚓", needs:["Lithuania","Latvia","Estonia"]},
+  {id:"caucasus", name:"Caucasus Federation", short:"CAU", flag:"⛰️", needs:["Georgia","Armenia","Azerbaijan"]},
+  {id:"africa", name:"African Union", short:"AFU", flag:"🌍", needs:["Egypt","South Africa","Nigeria"]},
+  {id:"sam", name:"Union of South America", short:"USA-S", flag:"🌎", needs:["Brazil","Argentina"]},
+  {id:"southasia", name:"South Asian Union", short:"SAU", flag:"🐘", needs:["India","Pakistan"]},
+  {id:"korea", name:"Korea", short:"KOR", flag:"🇰🇷", needs:["North Korea","South Korea"]},
+];
+
+const CONTINENTS = {
+  "United States":"North America", "Canada":"North America", "Mexico":"North America",
+  "Brazil":"South America", "Argentina":"South America",
+  "France":"Europe", "Germany":"Europe", "United Kingdom":"Europe", "Italy":"Europe",
+  "Spain":"Europe", "Poland":"Europe", "Ukraine":"Europe", "Netherlands":"Europe", "Sweden":"Europe",
+  "Russia":"Asia", "China":"Asia", "Japan":"Asia", "India":"Asia", "South Korea":"Asia",
+  "North Korea":"Asia", "Indonesia":"Asia", "Pakistan":"Asia", "Vietnam":"Asia", "Thailand":"Asia",
+  "Saudi Arabia":"Middle East", "Iran":"Middle East", "Turkey":"Middle East", "Israel":"Middle East",
+  "Egypt":"Africa", "South Africa":"Africa", "Nigeria":"Africa",
+  "Australia":"Oceania",
+  "Belarus":"Europe", "Moldova":"Europe", "Lithuania":"Europe", "Latvia":"Europe", "Estonia":"Europe",
+  "Kazakhstan":"Asia", "Uzbekistan":"Asia", "Turkmenistan":"Asia", "Tajikistan":"Asia", "Kyrgyzstan":"Asia",
+  "Georgia":"Asia", "Armenia":"Asia", "Azerbaijan":"Asia",
+};
+
+const IDEOLOGIES = {
+  democracy:  {name:"Democracy",  color:"var(--blue)"},
+  communism:  {name:"Communism",  color:"var(--red)"},
+  fascism:    {name:"Fascism",    color:"var(--muted)"},
+  monarchism: {name:"Monarchism", color:"var(--accent)"},
+  neutral:    {name:"Neutral",    color:"var(--text-dim)"},
+};
+
+const STARTING_IDEOLOGY = {
+  "United States":"democracy", "Canada":"democracy", "Mexico":"democracy",
+  "France":"democracy", "Germany":"democracy", "United Kingdom":"democracy",
+  "Italy":"democracy", "Spain":"democracy", "Japan":"democracy", "South Korea":"democracy",
+  "India":"democracy", "Brazil":"democracy", "Argentina":"democracy", "Poland":"democracy",
+  "Netherlands":"democracy", "Sweden":"democracy", "Israel":"democracy", "Indonesia":"democracy",
+  "Australia":"democracy", "Ukraine":"democracy", "South Africa":"democracy", "Nigeria":"democracy",
+  "Thailand":"democracy",
+  "China":"communism", "Russia":"neutral", "Vietnam":"communism", "North Korea":"communism",
+  "Saudi Arabia":"monarchism",
+  "Belarus":"communism", "Uzbekistan":"communism", "Turkmenistan":"communism", "Tajikistan":"communism",
+  "Kazakhstan":"neutral", "Kyrgyzstan":"neutral", "Azerbaijan":"neutral",
+  "Georgia":"democracy", "Armenia":"democracy", "Moldova":"democracy",
+  "Lithuania":"democracy", "Latvia":"democracy", "Estonia":"democracy",
+  "Iran":"monarchism", "Turkey":"neutral", "Egypt":"neutral", "Pakistan":"neutral",
+};
+
+const FIRST_NAMES = ["Alex","Maria","Chen","Ivan","Fatima","Kwame","Yuki","Omar","Elena","Raj",
+                      "Sofia","Wei","Amara","Dmitri","Leila","Hiro","Nadia","Carlos","Priya","Anders"];
+const LAST_NAMES = ["Volkov","Reyes","Okafor","Tanaka","Kowalski","Silva","Haddad","Nowak","Meyer",
+                     "Andersson","Kim","Petrov","Costa","Rahman","Larsson","Fischer","Diallo","Rossi"];
+
+class Leader {
+  constructor(name, ideology, approval){
+    this.name = name; this.ideology = ideology; this.approval = approval==null?60:approval;
+  }
+  toJSON(){ return {name:this.name, ideology:this.ideology, approval:this.approval}; }
+  static fromJSON(d){ return new Leader(d.name, d.ideology, d.approval); }
+  static random(ideology){
+    const name = `${choice(FIRST_NAMES)} ${choice(LAST_NAMES)}`;
+    return new Leader(name, ideology, Math.floor(rand(45,75)));
+  }
+}
+
+/* Decision events — condition/describe/options take (game, country) and mutate the country. */
+const DECISION_EVENTS = [
+  {
+    id: "political_crisis",
+    title: "📰 Political Crisis",
+    condition: (g,c) => c.rivalIdeologyGap() >= 15,
+    describe: (g,c) => {
+      const rival = c.leadingRivalIdeology();
+      return `${IDEOLOGIES[rival].name} support has reached ${c.ideologySupport[rival].toFixed(0)}% in ${c.name}. The government (${IDEOLOGIES[c.government].name}) is growing uneasy.`;
+    },
+    options: [
+      ["Crack down on the movement", (g,c)=>{ const r=c.leadingRivalIdeology(); c.shiftIdeology(r,-12); c.shiftIdeology(c.government,6); c.stability=Math.max(0,c.stability-8); }],
+      ["Allow the movement to grow", (g,c)=>{ const r=c.leadingRivalIdeology(); c.shiftIdeology(r,8); c.stability=Math.max(0,c.stability-2); }],
+      ["Attempt political reform", (g,c)=>{ const r=c.leadingRivalIdeology(); c.shiftIdeology(r,-4); c.shiftIdeology(c.government,2); c.stability=Math.min(100,c.stability+6); }],
+    ],
+  },
+  {
+    id: "economic_unrest",
+    title: "📉 Economic Unrest",
+    condition: (g,c) => c.resources < 30 && c.stability < 55,
+    describe: (g,c) => `Falling resources have left ${c.name} on edge. Stability: ${c.stability.toFixed(0)}%.`,
+    options: [
+      ["Emergency spending (costs resources, boosts stability)", (g,c)=>{ c.resources=Math.max(0,c.resources-15); c.stability=Math.min(100,c.stability+10); }],
+      ["Do nothing", (g,c)=>{ c.stability=Math.max(0,c.stability-5); }],
+    ],
+  },
+  {
+    id: "war_weariness",
+    title: "🏴 War Weariness",
+    condition: (g,c) => c.stability < 40,
+    describe: (g,c) => `Prolonged strife has worn down ${c.name}'s people. Stability: ${c.stability.toFixed(0)}%.`,
+    options: [
+      ["Rally the nation (propaganda campaign)", (g,c)=>{ c.resources=Math.max(0,c.resources-10); c.stability=Math.min(100,c.stability+15); }],
+      ["Let discontent simmer", (g,c)=>{ c.stability=Math.max(0,c.stability-5); }],
+    ],
+  },
+];
+
+const UNIT_TYPES = ["infantry","navy","air"];
+const UNIT_ICON = {infantry:"🎖", navy:"⚓", air:"✈", nukes:"☢"};
+const BASE_POWER = {infantry:1.0, navy:1.4, air:1.8};
+const BUILD_COSTS = {infantry:2, navy:4, air:6, nukes:150};
+const COUNTERS = {air:"infantry", infantry:"navy", navy:"air"};
+
+const RESOURCES_PER_RP = 2;
+const TECH_TREE = {
+  industrialization:   {name:"Industrialization",  cost:8,  prereq:[], desc:"+25% resource income every month."},
+  motorized_infantry:  {name:"Motorized Infantry", cost:6,  prereq:[], desc:"Infantry cost -1, +0.2 power each."},
+  naval_engineering:    {name:"Naval Engineering",  cost:6,  prereq:[], desc:"Navy cost -1, +0.2 power each."},
+  air_superiority:      {name:"Air Superiority",    cost:8,  prereq:[], desc:"+0.3 combat power per air unit."},
+  fortifications:       {name:"Fortifications",     cost:6,  prereq:[], desc:"+15% defense on home territory."},
+  cyber_warfare:        {name:"Cyber Warfare",       cost:10, prereq:["industrialization"], desc:"+15% spy/sabotage success."},
+  research_institutes:  {name:"Research Institutes", cost:5,  prereq:[], desc:"+1 research point every month."},
+  advanced_research:    {name:"Advanced Research Labs", cost:12, prereq:["research_institutes"], desc:"+2 more RP every month (3 total from these two)."},
+  nuclear_program:      {name:"Nuclear Program",     cost:10, prereq:["industrialization","motorized_infantry"], desc:"Required to build nukes."},
+  icbm:                  {name:"ICBM Technology",     cost:16, prereq:["nuclear_program"], desc:"Launch nukes anywhere, no navy needed."},
+  radar_network:         {name:"Radar Network",       cost:10, prereq:["air_superiority"], desc:"+15% chance to intercept nukes."},
+};
+
+const DEFAULT_YEARS = 0;                 // 0 = play until someone wins
+const START_DATE = Date.UTC(1991,11,26); // the Soviet Union dissolves
+const DAYS_PER_MONTH = 30;               // economy, politics and diplomacy tick monthly
+const MONTHS_PER_YEAR = 12;
+const NUKE_CAP_BASE = 15, NUKE_CAP_PER_YEAR = 0.5, NUKE_CAP_UNLIMITED_YEARS = 50;
+const NUKE_POWER_WEIGHT = 6;             // how much one warhead counts toward "military" (display / upkeep)
+const AI_ACT_DAYS = [24, 36];            // each AI nation acts every 24-36 days
+const SPEEDS = [{label:"⏸", ms:0}, {label:"1×", ms:900}, {label:"2×", ms:450}, {label:"5×", ms:180}, {label:"15×", ms:60}];
+const ACTION_COOLDOWNS = {attack:7, continent:45, build:3, research:5, politics:30, alliance:20, pact:14, merge:30, spy:10, nuke:90};
+function nukeCapFor(years){ const y = years>0 ? years : NUKE_CAP_UNLIMITED_YEARS; return Math.round(NUKE_CAP_BASE + y*NUKE_CAP_PER_YEAR); }
+let nukeCap = nukeCapFor(DEFAULT_YEARS);
+const ECONOMIC_VICTORY_RESOURCES = 3000;
+const OFFENSIVE_POWER_K = 1.5;   // continental offensive: power per front = K/sqrt(fronts), clamped
+const OFFENSIVE_POWER_MIN = 0.35;
+const AI_ATTACK_CHANCE = 0.14;
+const AI_OVERSEAS_PENALTY = 80;
+const BREACH_WINDOW_DAYS = 120;   // a breached last-territory nation falls to a second victory within this window
+const AI_GRACE_TURNS = 3;       // months: AIs leave the player alone at the start of a game
+const LAST_STAND_BONUS = 1.25;  // defence multiplier for a nation down to its last territory
+const GOV_CHANGE_COST = 40;
+const GOV_CHANGE_STABILITY = 15;
+const INCOME_TAPER = 400;   // compounding income slows as treasury grows: rate = 8% / (1 + res/INCOME_TAPER)  // chance an AI that picked a target actually attacks (x difficulty aggression)
+const ECON_STREAK_NEEDED = 24;      // months
+const ALLIANCE_DOMINANCE_PCT = 0.60;
+const ALLIANCE_STREAK_NEEDED = 24;  // months
+
+const CONQUEST_SHARE = 0.5;              // World Conquest: hold this share of all territory...
+const CONQUEST_STREAK_NEEDED = 6;      // ...for this many months running
+const SUPERPOWER_MARGIN = 1.3;           // Superpower: power score at least this many times the runner-up...
+const SUPERPOWER_STREAK_NEEDED = 24;    // ...for this many months running
+const STREAK_UNIT = "months";
+const OBJ_STREAK = {conquest:CONQUEST_STREAK_NEEDED, economic:ECON_STREAK_NEEDED, alliance:ALLIANCE_STREAK_NEEDED, superpower:SUPERPOWER_STREAK_NEEDED};
+
+/* How you choose to win. Only the chosen objective (plus total conquest) ends the game in victory. */
+const OBJECTIVES = {
+  conquest:   {icon:"🌍", name:"World Conquest",   desc:`Hold ${Math.round(CONQUEST_SHARE*100)}% of the world's territory for ${CONQUEST_STREAK_NEEDED} ${STREAK_UNIT}.`},
+  economic:   {icon:"💰", name:"Economic Power",   desc:`Sit on ${ECONOMIC_VICTORY_RESOURCES}+ resources for ${ECON_STREAK_NEEDED} ${STREAK_UNIT}.`},
+  alliance:   {icon:"🤝", name:"Grand Alliance",   desc:`You and your allies hold ${Math.round(ALLIANCE_DOMINANCE_PCT*100)}% of the world for ${ALLIANCE_STREAK_NEEDED} ${STREAK_UNIT}.`},
+  formation:  {icon:"🏴", name:"Nation Builder",   desc:"Proclaim one specific formable nation (you pick which)."},
+  technology: {icon:"🔬", name:"Tech Supremacy",   desc:"Research every technology in the tree."},
+  superpower: {icon:"👑", name:"Superpower",       desc:`Be the #1 power, ${SUPERPOWER_MARGIN}× the runner-up, for ${SUPERPOWER_STREAK_NEEDED} ${STREAK_UNIT}.`},
+  survival:   {icon:"🛡", name:"Survival",         desc:"Still be standing when the clock runs out."},
+  sandbox:    {icon:"🧭", name:"Sandbox",          desc:"No win condition. Play your own way."},
+};
+
+const DIFFICULTIES = {
+  easy:   {aiAggression:0.7,  bonus:40,  label:"Easy",   desc:"Cautious rivals, +40 starting resources."},
+  normal: {aiAggression:1.0,  bonus:0,   label:"Normal",  desc:"Balanced rivals, standard economy."},
+  hard:   {aiAggression:1.35, bonus:-20, label:"Hard",    desc:"Aggressive rivals, -20 starting resources."},
+};
+
+const SAVE_KEY = "world_conqueror_nonturnbased_save_v3";
+
+/* ============================== HELPERS ============================== */
+
+function clamp(v,lo,hi){ return Math.max(lo, Math.min(hi, v)); }
+function rand(lo,hi){ return lo + Math.random()*(hi-lo); }
+function choice(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function shuffle(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function fmt(n){ return Math.round(n).toLocaleString("en-US"); }
+function esc(s){ const d=document.createElement("div"); d.textContent=s; return d.innerHTML; }
+function pairKey(a,b){ return [a,b].sort().join("\u0001"); }
+
+/* ============================== COUNTRY ============================== */
+
+class Country {
+  constructor(name, short, flag, population, resources, units, isPlayer, territory, government){
+    this.name = name;
+    this.short = short;
+    this.flag = flag;
+    this.population = population;
+    this.resources = resources;
+    this.units = units || {infantry:0, navy:0, air:0, nukes:0};
+    this.territory = territory ? new Set(territory) : new Set([name]);
+    this.isPlayer = !!isPlayer;
+    this.breachDay = null;
+    this.nextAct = 0;   // day on which this (AI) nation next acts
+    this.alive = true;
+    this.allies = new Set();
+    this.researchPoints = 0;
+    this.researched = new Set();
+    // politics
+    this.government = government || "neutral";
+    this.stability = Math.floor(rand(55,80));
+    this.ideologySupport = Country.startingSupport(this.government);
+    this.leader = Leader.random(this.government);
+  }
+  static startingSupport(government){
+    const support = {};
+    for(const id of Object.keys(IDEOLOGIES)) support[id] = 0.0;
+    support[government] = 55.0;
+    const remainder = 45.0;
+    const others = Object.keys(IDEOLOGIES).filter(i=>i!==government);
+    const weights = others.map(()=>Math.random());
+    const totalW = weights.reduce((a,b)=>a+b,0) || 1;
+    others.forEach((id,i)=>{ support[id] = remainder * (weights[i]/totalW); });
+    return support;
+  }
+  shiftIdeology(ideology, amount){
+    if(!(ideology in this.ideologySupport)) return;
+    this.ideologySupport[ideology] = Math.max(0, this.ideologySupport[ideology]+amount);
+    const total = Object.values(this.ideologySupport).reduce((a,b)=>a+b,0);
+    if(total>0) for(const k of Object.keys(this.ideologySupport)) this.ideologySupport[k] = this.ideologySupport[k]/total*100;
+  }
+  leadingRivalIdeology(){
+    let best=null, bestV=-1;
+    for(const [k,v] of Object.entries(this.ideologySupport)){
+      if(k===this.government) continue;
+      if(v>bestV){ bestV=v; best=k; }
+    }
+    return best;
+  }
+  rivalIdeologyGap(){
+    const r = this.leadingRivalIdeology();
+    return this.ideologySupport[r] - this.ideologySupport[this.government];
+  }
+  canHaveCivilWar(){ return this.territory.size >= 2; }
+  static fromMilitary(name, short, flag, population, resources, military, isPlayer, government){
+    const infantry = Math.floor(military*0.6);
+    const navy = Math.floor(military*0.25);
+    const air = Math.max(0, military - infantry - navy);
+    return new Country(name, short, flag, population, resources, {infantry, navy, air, nukes:0}, isPlayer, null, government);
+  }
+  get military(){
+    return Math.floor(
+      this.units.infantry*BASE_POWER.infantry +
+      this.units.navy*BASE_POWER.navy +
+      this.units.air*BASE_POWER.air +
+      this.units.nukes*NUKE_POWER_WEIGHT
+    );
+  }
+  get powerScore(){
+    return this.military*1.2 + this.resources*0.5 + this.territory.size*15;
+  }
+  hasTech(id){ return this.researched.has(id); }
+  effectivePowerAgainst(defUnits){
+    let base = 0;
+    for(const u of UNIT_TYPES){
+      let per = BASE_POWER[u];
+      if(u==="infantry" && this.hasTech("motorized_infantry")) per += 0.2;
+      if(u==="navy" && this.hasTech("naval_engineering")) per += 0.2;
+      if(u==="air" && this.hasTech("air_superiority")) per += 0.3;
+      base += this.units[u]*per;
+    }
+    let bonus = 0;
+    for(const u of UNIT_TYPES){
+      const n = this.units[u];
+      const countered = COUNTERS[u];
+      if(countered && (defUnits[countered]||0) > 0 && n > 0){
+        bonus += n*BASE_POWER[u]*0.5;
+      }
+    }
+    return base + bonus;
+  }
+  collectIncome(){
+    let income = Math.max(1, Math.floor(this.resources*0.08/(1+this.resources/INCOME_TAPER))) + this.territory.size*2;
+    if(this.hasTech("industrialization")) income = Math.floor(income*1.25);
+    this.resources += income;
+    const upkeep = Math.max(1, Math.floor(this.military*0.03));
+    this.resources = Math.max(0, this.resources - upkeep);
+    let rpGain = 2 + this.territory.size*0.4;
+    if(this.hasTech("research_institutes")) rpGain += 1;
+    if(this.hasTech("advanced_research")) rpGain += 2;
+    this.researchPoints += rpGain;
+    return {income, upkeep, rpGain};
+  }
+  buildUnit(type, amount){
+    if(amount<=0) return {ok:false, cost:0};
+    if(type==="nukes" && !this.hasTech("nuclear_program")) return {ok:false, cost:-1};
+    if(type==="nukes" && this.units.nukes + amount > nukeCap) return {ok:false, cost:-2};
+    let per = BUILD_COSTS[type];
+    if(type==="infantry" && this.hasTech("motorized_infantry")) per = Math.max(1, per-1);
+    if(type==="navy" && this.hasTech("naval_engineering")) per = Math.max(1, per-1);
+    const cost = amount*per;
+    if(cost > this.resources) return {ok:false, cost};
+    this.resources -= cost;
+    this.units[type] += amount;
+    return {ok:true, cost};
+  }
+  applyLosses(fraction){
+    for(const u of UNIT_TYPES) this.units[u] = Math.max(0, Math.floor(this.units[u]*(1-fraction)));
+  }
+  availableTechs(){
+    return Object.keys(TECH_TREE).filter(id =>
+      !this.researched.has(id) && TECH_TREE[id].prereq.every(p => this.researched.has(p))
+    );
+  }
+  researchTech(id){
+    const t = TECH_TREE[id];
+    if(!t || this.researched.has(id)) return false;
+    if(!t.prereq.every(p => this.researched.has(p))) return false;
+    if(this.researchPoints < t.cost) return false;
+    this.researchPoints -= t.cost;
+    this.researched.add(id);
+    return true;
+  }
+  formNation(other){
+    const dominant = this.powerScore >= other.powerScore ? this : other;
+    const nn = new Country(
+      `${this.name}-${other.name}`,
+      `${this.short}-${other.short}`,
+      `${this.flag}${other.flag}`,
+      this.population+other.population,
+      this.resources+other.resources,
+      {
+        infantry:this.units.infantry+other.units.infantry,
+        navy:this.units.navy+other.units.navy,
+        air:this.units.air+other.units.air,
+        nukes:this.units.nukes+other.units.nukes,
+      },
+      this.isPlayer||other.isPlayer,
+      new Set([...this.territory, ...other.territory]),
+      dominant.government
+    );
+    nn.researchPoints = this.researchPoints + other.researchPoints;
+    nn.researched = new Set([...this.researched, ...other.researched]);
+    nn.stability = Math.floor((this.stability + other.stability)/2);
+    nn.leader = dominant.leader;
+    return nn;
+  }
+  toJSON(){
+    return {
+      name:this.name, short:this.short, flag:this.flag, population:this.population,
+      resources:this.resources, units:this.units, territory:[...this.territory],
+      isPlayer:this.isPlayer, alive:this.alive, allies:[...this.allies], nextAct:this.nextAct, breachDay:this.breachDay,
+      researchPoints:this.researchPoints, researched:[...this.researched],
+      government:this.government, stability:this.stability,
+      ideologySupport:this.ideologySupport, leader:this.leader.toJSON(),
+    };
+  }
+  static fromJSON(d){
+    const c = new Country(d.name, d.short, d.flag, d.population, d.resources, d.units, d.isPlayer, d.territory, d.government||"neutral");
+    c.alive = d.alive;
+    c.nextAct = d.nextAct || 0;
+    c.breachDay = d.breachDay ?? null;
+    c.allies = new Set(d.allies);
+    c.researchPoints = d.researchPoints;
+    c.researched = new Set(d.researched);
+    c.stability = d.stability!=null ? d.stability : 65;
+    if(d.ideologySupport) c.ideologySupport = {...d.ideologySupport};
+    if(d.leader) c.leader = Leader.fromJSON(d.leader);
+    return c;
+  }
+}
+
+/* ============================== ADJACENCY ============================== */
+
+function buildAdjacency(edges){
+  const adj = {};
+  for(const [a,b] of edges){
+    (adj[a] = adj[a]||new Set()).add(b);
+    (adj[b] = adj[b]||new Set()).add(a);
+  }
+  return adj;
+}
+const ADJACENCY = buildAdjacency(ADJACENCY_EDGES);
+
+/* ============================== GAME ============================== */
+
+class Game {
+  constructor(){
+    this.countries = {};
+    this.player = null;
+    this.turn = 1;          // months elapsed (+1); one "turn" = one month of game time
+    this.day = 0;           // days since 26 Dec 1991
+    this.maxYears = DEFAULT_YEARS;
+    this.cooldowns = {};    // player action -> day it is ready again
+    this.difficulty = "normal";
+    this.pacts = {};      // pairKey -> expiry turn
+    this.grudges = {};    // holder -> {target: points}
+    this.playerIntel = {}; // target -> turn last spied
+    this.objective = {id:"conquest", formableId:null};
+    this.objStreak = 0;          // consecutive turns/months the objective condition has held
+    this.objectiveDone = false;
+    this.ended = null;
+    this.history = [];       // [{turn, text}]
+    this.formed = new Set();      // ids of formable nations already proclaimed
+    this.announced = new Set();   // formables the player has been told they can form
+    this.eventCooldowns = {}; // "country:eventId" -> last-triggered turn
+  }
+  grudge(holder, target){ return (this.grudges[holder] && this.grudges[holder][target]) || 0; }
+  addGrudge(holder, target, amt){
+    if(!this.grudges[holder]) this.grudges[holder] = {};
+    this.grudges[holder][target] = (this.grudges[holder][target]||0) + amt;
+  }
+  hasPact(a,b){ return pairKey(a,b) in this.pacts; }
+  logHistory(text){ this.history.push({date:this.dateString(), text}); }
+  dateString(){
+    const d = new Date(START_DATE + this.day*864e5);
+    return `${d.getUTCDate()} ${["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][d.getUTCMonth()]} ${d.getUTCFullYear()}`;
+  }
+  yearsElapsed(){ return this.day/365.25; }
+
+  setup(countryName, difficulty, years, objective){
+    this.difficulty = difficulty;
+    this.objective = {id: (objective && objective.id) || "conquest", formableId: (objective && objective.formableId) || null};
+    this.objStreak = 0; this.objectiveDone = false;
+    this.maxYears = years>0 ? clamp(Math.round(years), 1, 500) : 0;
+    nukeCap = nukeCapFor(this.maxYears);
+    this.countries = {};
+    for(const [name, d] of Object.entries(COUNTRIES_DATA)){
+      const c = Country.fromMilitary(name, d.short, d.flag, d.pop, d.res, d.mil, false, STARTING_IDEOLOGY[name]||"neutral");
+      c.units.nukes = Math.min(d.nukes||0, nukeCap);
+      if(c.units.nukes>0) c.researched.add("nuclear_program");
+      c.nextAct = Math.floor(rand(1, AI_ACT_DAYS[1]));   // stagger the AIs so the world moves continuously
+      this.countries[name] = c;
+    }
+    this.player = this.countries[countryName];
+    this.player.isPlayer = true;
+    const bonus = DIFFICULTIES[difficulty].bonus;
+    if(bonus) this.player.resources = Math.max(10, this.player.resources+bonus);
+  }
+
+  territoriesAdjacent(t1,t2){ return !!(ADJACENCY[t1] && ADJACENCY[t1].has(t2)); }
+
+  getAttackable(attacker){
+    const results = [];
+    for(const other of Object.values(this.countries)){
+      if(other===attacker) continue;
+      if(attacker.allies.has(other.name)) continue;
+      for(const t of other.territory){
+        const adjacent = [...attacker.territory].some(at => this.territoriesAdjacent(t, at));
+        if(adjacent) results.push({target:other, territory:t, overseas:false});
+        else if((attacker.units.navy||0) > 0) results.push({target:other, territory:t, overseas:true});
+      }
+    }
+    return results;
+  }
+
+  getAttackableByContinent(attacker){
+    const options = this.getAttackable(attacker).filter(o=>!this.hasPact(attacker.name, o.target.name));
+    const byContinent = {};
+    for(const o of options){
+      const cont = CONTINENTS[o.territory] || "Unknown";
+      (byContinent[cont] = byContinent[cont]||[]).push(o);
+    }
+    return byContinent;
+  }
+
+  /* ---- politics ---- */
+  processPolitics(country, log){
+    for(const ideo of Object.keys(IDEOLOGIES)){
+      let drift = rand(-1.5,1.5);
+      if(country.stability < 50 && ideo !== country.government) drift += 1.0;
+      country.shiftIdeology(ideo, drift);
+    }
+    if(country.stability < 60) country.stability = Math.min(60, country.stability+1);
+    else if(country.stability > 60) country.stability = Math.max(60, country.stability-0.5);
+
+    if(country.government==="democracy" && this.turn % (4*MONTHS_PER_YEAR) === 0){
+      const rival = country.leadingRivalIdeology();
+      if(country.ideologySupport[rival] > country.ideologySupport[country.government] && Math.random() < 0.5){
+        country.government = rival;
+        country.leader = Leader.random(rival);
+        country.stability = Math.min(100, country.stability+10);
+        const msg = `${country.flag} ${country.name} holds elections — ${IDEOLOGIES[rival].name} wins! New leader: ${country.leader.name}.`;
+        this.logHistory(msg);
+        log(`🗳️ Election — ${msg}`, "note");
+        return;
+      }
+    }
+    if(country.stability < 35){
+      const rival = country.leadingRivalIdeology();
+      if(country.rivalIdeologyGap() >= 20 && Math.random() < 0.12){
+        country.government = rival;
+        country.leader = Leader.random(rival);
+        country.stability = Math.min(100, country.stability+15);
+        const msg = `⚡ Coup in ${country.name}! ${IDEOLOGIES[rival].name} forces seize power.`;
+        this.logHistory(msg);
+        log(msg, "bad");
+      }
+    }
+  }
+
+  checkCivilWars(log){
+    for(const name of Object.keys(this.countries)){
+      const country = this.countries[name];
+      if(!country || !country.canHaveCivilWar()) continue;
+      if(country.stability < 30 && country.rivalIdeologyGap() >= 35 && Math.random() < 0.25){
+        this.triggerCivilWar(country, log);
+      }
+    }
+  }
+
+  triggerCivilWar(country, log){
+    const rebelIdeology = country.leadingRivalIdeology();
+    const territories = [...country.territory].sort();
+    const rebelTerritories = new Set(territories.filter((_,i)=>i%2===0));
+    const govTerritories = new Set([...country.territory].filter(t=>!rebelTerritories.has(t)));
+    if(!rebelTerritories.size || !govTerritories.size) return;
+    const fraction = rebelTerritories.size/territories.length;
+
+    let baseName = `${IDEOLOGIES[rebelIdeology].name} ${country.name}`;
+    let rebelName = baseName, suffix = 2;
+    while(rebelName in this.countries){ rebelName = `${baseName} (${suffix})`; suffix++; }
+
+    const rebelUnits = {};
+    for(const u of ["infantry","navy","air","nukes"]){
+      rebelUnits[u] = Math.max(0, Math.floor(country.units[u]*fraction*0.7));
+      country.units[u] = Math.max(0, country.units[u]-rebelUnits[u]);
+    }
+
+    const rebel = new Country(
+      rebelName, country.short+"-R", country.flag,
+      Math.floor(country.population*fraction), Math.floor(country.resources*fraction*0.6),
+      rebelUnits, false, rebelTerritories, rebelIdeology
+    );
+    country.population = Math.floor(country.population*(1-fraction));
+    country.resources = Math.floor(country.resources*(1-fraction*0.6));
+    country.territory = govTerritories;
+    country.stability = Math.min(100, country.stability+20);
+    country.ideologySupport[rebelIdeology] = 5.0;
+
+    this.countries[rebelName] = rebel;
+    this.addGrudge(country.name, rebelName, 200);
+    this.addGrudge(rebelName, country.name, 200);
+
+    const msg = `💥 CIVIL WAR in ${country.name}! ${IDEOLOGIES[rebelIdeology].name} rebels break away as ${rebel.flag} ${rebelName}.`;
+    this.logHistory(msg);
+    log(msg, "bad");
+    this.cleanupAfterChange();
+  }
+
+  /* returns a pending decision-event object for player-interactive calls, else null (and applies the effect itself when non-interactive) */
+  maybeTriggerDecisionEvent(country, interactive, log){
+    for(const event of DECISION_EVENTS){
+      const key = `${country.name}:${event.id}`;
+      if(this.turn - (this.eventCooldowns[key] ?? -999) < 5) continue;
+      if(!event.condition(this, country)) continue;
+      if(Math.random() > 0.5) continue;
+      this.eventCooldowns[key] = this.turn;
+      if(interactive) return {event, country};
+      const [label, effect] = choice(event.options);
+      effect(this, country);
+      this.logHistory(`${country.flag} ${country.name}: ${event.title} → "${label}"`);
+      return null;
+    }
+    return null;
+  }
+
+  fuzzed(v){ return Math.round(v*rand(0.75,1.25)); }
+
+  displayStats(target, fog){
+    if(!fog || target===this.player) return {pop:target.population, res:String(target.resources), mil:String(target.military), known:true};
+    const known = (this.playerIntel[target.name] ?? -999) >= this.turn - 5;
+    if(known) return {pop:target.population, res:String(target.resources), mil:String(target.military), known:true};
+    return {pop:target.population, res:"~"+this.fuzzed(target.resources), mil:"~"+this.fuzzed(target.military), known:false};
+  }
+
+  averagePower(exclude){
+    const vals = Object.values(this.countries).filter(c=>c!==exclude).map(c=>c.powerScore);
+    return vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : 1;
+  }
+
+  allianceAcceptChance(proposer, target){
+    let chance = 0.6;
+    const avg = this.averagePower();
+    if(proposer.powerScore > avg*1.8) chance -= 0.35;
+    chance -= Math.min(0.4, this.grudge(target.name, proposer.name)*0.01);
+    if(target.powerScore < proposer.powerScore*0.6) chance += 0.1;
+    return clamp(chance, 0.05, 0.95);
+  }
+
+  cleanupAfterChange(){
+    const dead = Object.entries(this.countries).filter(([,c])=>!c.alive).map(([n])=>n);
+    for(const n of dead) delete this.countries[n];
+    const valid = new Set(Object.keys(this.countries));
+    for(const c of Object.values(this.countries)){
+      c.allies = new Set([...c.allies].filter(n=>valid.has(n)));
+    }
+    for(const k of Object.keys(this.pacts)){
+      const [a,b] = k.split("\u0001");
+      if(!valid.has(a) || !valid.has(b)) delete this.pacts[k];
+    }
+  }
+
+  resolveAttack(attacker, defender, territoryName, overseas, verbose, log, atkMultiplier, lossScale){
+    // the world moves in real time: the target may have changed hands since the menu was drawn
+    if(!(attacker.name in this.countries) || this.countries[defender.name]!==defender || !defender.territory.has(territoryName)) return false;
+    const wasAlly = attacker.allies.has(defender.name);
+    const hadPact = this.hasPact(attacker.name, defender.name);
+
+    let atkPower = attacker.effectivePowerAgainst(defender.units) * rand(0.85,1.2) * (atkMultiplier||1);
+    if(overseas) atkPower *= 0.85;
+    let defPower = defender.effectivePowerAgainst(attacker.units) * rand(0.85,1.2) * 1.1;
+    if(defender.hasTech("fortifications")) defPower *= 1.15;
+    if(defender.territory.size===1) defPower *= LAST_STAND_BONUS;
+
+    if(verbose){
+      log(`⚔ ${attacker.flag} ${attacker.name} attacks ${defender.flag} ${defender.name} for ${territoryName}.`, "warn");
+      log(`  attack power ${atkPower.toFixed(1)}  vs  defense power ${defPower.toFixed(1)}`, "info");
+    }
+
+    const diffRatio = (atkPower-defPower) / Math.max(1, atkPower+defPower);
+    const successChance = clamp(0.5 + diffRatio*0.9, 0.08, 0.92);
+    const won = Math.random() < successChance;
+    // lossScale < 1 means only a slice of the army was committed to this front (continental offensive)
+    const ls = lossScale==null ? 1 : lossScale;
+    const loserLosses = rand(0.12,0.28);
+    const winnerLosses = rand(0.03,0.12);
+
+    if(won){
+      attacker.applyLosses(winnerLosses*ls);
+      defender.applyLosses(loserLosses);
+      // A nation's last territory can't be taken in one blow: the first victory breaches its defences,
+      // and a second victory within BREACH_WINDOW_DAYS finishes it.
+      const breach = defender.territory.size===1 && !(defender.breachDay!=null && this.day - defender.breachDay <= BREACH_WINDOW_DAYS);
+      if(breach){
+        defender.breachDay = this.day;
+        defender.applyLosses(rand(0.10,0.20));
+        attacker.resources += Math.floor(defender.resources*0.10);
+        defender.resources = Math.floor(defender.resources*0.85);
+        defender.population = Math.floor(defender.population*0.92);
+        defender.stability = Math.max(0, defender.stability-15);
+        log(`💥 ${attacker.flag} ${attacker.name} breaches ${defender.flag} ${defender.name}'s defences at ${territoryName} — one more victory will finish them.`, defender===this.player ? "bad" : "warn");
+      } else {
+      const fraction = 1/Math.max(1, defender.territory.size);
+      attacker.population += Math.floor(defender.population*fraction);
+      attacker.resources += Math.floor(defender.resources*fraction*0.5);
+      defender.population = Math.floor(defender.population*(1-fraction));
+      defender.resources = Math.floor(defender.resources*(1-fraction));
+      defender.territory.delete(territoryName);
+      attacker.territory.add(territoryName);
+      const eliminated = defender.territory.size===0;
+      if(verbose) log(`💥 ${attacker.flag} ${attacker.name} conquers ${territoryName}!`, "good");
+      else log(`${attacker.flag} ${attacker.short} conquered ${territoryName} from ${defender.flag} ${defender.short}`, "info");
+      if(eliminated){
+        defender.alive = false;
+        log(`💀 ${defender.flag} ${defender.name} has been eliminated!`, "bad");
+        this.logHistory(`💀 ${defender.flag} ${defender.name} was eliminated by ${attacker.flag} ${attacker.name}.`);
+      }
+      }
+    } else {
+      attacker.applyLosses(loserLosses*ls);
+      defender.applyLosses(winnerLosses);
+      if(verbose) log(`🛡 ${attacker.name}'s attack on ${territoryName} fails.`, "warn");
+      else if(atkMultiplier==null && Math.random()<0.3) log(`🛡 ${defender.flag} ${defender.short} repelled ${attacker.flag} ${attacker.short}`, "info");
+    }
+
+    this.addGrudge(defender.name, attacker.name, 15);
+    if(wasAlly){
+      this.addGrudge(defender.name, attacker.name, 40);
+      attacker.allies.delete(defender.name);
+      defender.allies.delete(attacker.name);
+    }
+    if(hadPact){
+      this.addGrudge(defender.name, attacker.name, 25);
+      delete this.pacts[pairKey(attacker.name, defender.name)];
+    }
+
+    if(defender===this.player && attacker!==this.player){
+      log(`⚠ UNDER ATTACK — ${attacker.flag} ${attacker.name} struck you. ${won ? "You lost "+territoryName+"!" : "You held "+territoryName+"."}`, won?"bad":"good");
+    }
+
+    this.cleanupAfterChange();
+    return won;
+  }
+
+  canReachWithNuke(attacker, defender){
+    if(attacker.hasTech("icbm")) return true;
+    if((attacker.units.navy||0) > 0) return true;
+    for(const t of defender.territory) for(const at of attacker.territory)
+      if(this.territoriesAdjacent(t, at)) return true;
+    return false;
+  }
+
+  useNuke(attacker, defender, verbose, log, isRetaliation){
+    if(attacker.units.nukes < 1) return false;
+    attacker.units.nukes -= 1;
+    let intercept = clamp((defender.units.air||0)*0.01, 0, 0.5);
+    if(defender.hasTech("radar_network")) intercept = clamp(intercept+0.15, 0, 0.65);
+    if(Math.random() < intercept){
+      if(verbose) log(`☢ ${defender.name}'s air defenses intercept the incoming warhead!`, "note");
+      return true;
+    }
+    const dmg = rand(0.3,0.45);
+    defender.population = Math.floor(defender.population*(1-dmg*0.5));
+    defender.resources = Math.max(0, Math.floor(defender.resources*(1-dmg)));
+    defender.applyLosses(dmg);
+    log(`☢☢☢ ${attacker.flag} ${attacker.name} launches a NUCLEAR STRIKE on ${defender.flag} ${defender.name}!`, "bad");
+    this.logHistory(`☢ ${attacker.flag} ${attacker.name} launched a nuclear strike on ${defender.flag} ${defender.name}.`);
+    this.addGrudge(defender.name, attacker.name, 60);
+    for(const cnt of Object.values(this.countries)) if(cnt!==attacker) this.addGrudge(cnt.name, attacker.name, 20);
+    if(defender.territory.size===0 || defender.population<=0){
+      defender.alive = false;
+      this.logHistory(`💀 ${defender.flag} ${defender.name} was destroyed in the nuclear strike.`);
+    }
+    // mutually assured destruction: a surviving nuclear power usually hits back
+    if(!isRetaliation && defender.alive && defender.units.nukes>0 && this.canReachWithNuke(defender, attacker) && Math.random()<0.75){
+      log(`☢ ${defender.flag} ${defender.name} retaliates against ${attacker.flag} ${attacker.name}!`, "bad");
+      this.useNuke(defender, attacker, true, log, true);
+    }
+    this.cleanupAfterChange();
+    return true;
+  }
+
+  /* Continental offensive: strike every reachable territory in one continent in a single sweep.
+     Forces are split across fronts: each front fights at reduced power but also risks only its
+     slice of the army, so the total risk stays comparable to one big battle. Returns {conquered, attempted}. */
+  offensivePower(n){ return clamp(OFFENSIVE_POWER_K/Math.sqrt(Math.max(1,n)), OFFENSIVE_POWER_MIN, 1); }
+  offensiveLossScale(n){ return 1/Math.max(1,n); }
+  continentalOffensive(attacker, continentName, log){
+    const byContinent = this.getAttackableByContinent(attacker);
+    // weakest defenders first, so the army is spent where it is most likely to win
+    const targets = (byContinent[continentName] || []).slice().sort((a,b)=>a.target.powerScore-b.target.powerScore);
+    if(!targets.length) return {conquered:0, attempted:0};
+    const n = targets.length;
+    const multiplier = this.offensivePower(n);
+    const lossScale = this.offensiveLossScale(n);
+    log(`🌐 Launching a continental offensive across ${continentName}! (${(multiplier*100).toFixed(0)}% power per front)`, "warn");
+    let conquered = 0, attempted = 0;
+    for(const {target, territory, overseas} of targets){
+      const current = this.countries[target.name];
+      if(!current || !current.territory.has(territory)) continue; // already taken this sweep, or eliminated
+      if(!(attacker.name in this.countries)) break;
+      attempted++;
+      const won = this.resolveAttack(attacker, current, territory, overseas, false, log, multiplier, lossScale);
+      if(won) conquered++;
+      else log(`🛡 ${current.flag} ${current.name} held ${territory}.`, "info");
+    }
+    log(`Continental offensive complete: ${conquered}/${attempted} territories conquered.`, conquered ? "good" : "warn");
+    return {conquered, attempted};
+  }
+
+  /* ---- real-time clock ---- */
+  /* Monthly: economy, politics, events. Returns a pending decision for the player, or null. */
+  monthlyTick(log){
+    this.turn += 1;
+    for(const c of Object.values(this.countries)){
+      if(c===this.player){
+        const {income, upkeep, rpGain} = c.collectIncome();
+        log(`💰 ${this.dateString()}: +${income} resources (upkeep -${upkeep}), +${rpGain.toFixed(1)} RP`, "good");
+      } else c.collectIncome();
+      this.processPolitics(c, log);
+    }
+    for(const c of Object.values(this.countries)){
+      if(c!==this.player && c.name in this.countries) this.maybeTriggerDecisionEvent(c, false, log);
+    }
+    this.randomEvent(log);
+    for(const k of Object.keys(this.pacts)) if(this.pacts[k] <= this.turn) delete this.pacts[k];
+    for(const holder of Object.keys(this.grudges)){
+      for(const target of Object.keys(this.grudges[holder])){
+        this.grudges[holder][target] = Math.max(0, this.grudges[holder][target]-2);
+      }
+    }
+    this.checkCivilWars(log);
+    this.checkFormables(log);
+    this.updateStreaks();
+    return this.maybeTriggerDecisionEvent(this.player, true, log);
+  }
+
+  /* Advance the world one day. Returns {decision, proposal} when the player has something to answer. */
+  stepDay(log){
+    this.day += 1;
+    const res = {};
+    if(this.day % DAYS_PER_MONTH === 0) res.decision = this.monthlyTick(log);
+    if(!(this.player.name in this.countries)) return res;
+    const due = Object.values(this.countries).filter(c=>c!==this.player && c.nextAct<=this.day);
+    for(const c of shuffle(due)){
+      if(!(c.name in this.countries) || !(this.player.name in this.countries)) continue;
+      c.nextAct = this.day + Math.floor(rand(AI_ACT_DAYS[0], AI_ACT_DAYS[1]+1));
+      const proposal = this.aiTurn(c, log);
+      if(proposal){ res.proposal = proposal; break; }   // anyone else still due acts tomorrow
+    }
+    return res;
+  }
+
+  /* ---- formable nations ---- */
+  formableProgress(country, f){
+    return {have: f.needs.filter(t=>country.territory.has(t)), missing: f.needs.filter(t=>!country.territory.has(t))};
+  }
+  canForm(country, f){
+    return !this.formed.has(f.id) && country.name!==f.name && !(f.name in this.countries) && this.formableProgress(country, f).missing.length===0;
+  }
+  holderOf(territory){ return Object.values(this.countries).find(c=>c.territory.has(territory)) || null; }
+
+  /* Rename a nation in place and carry every reference to it (allies, pacts, grudges, intel, event cooldowns). */
+  renameCountry(country, newName, newShort, newFlag){
+    const old = country.name;
+    delete this.countries[old];
+    country.name = newName; country.short = newShort; country.flag = newFlag;
+    this.countries[newName] = country;
+    for(const c of Object.values(this.countries)){
+      if(c.allies.has(old)){ c.allies.delete(old); c.allies.add(newName); }
+    }
+    const np = {};
+    for(const [k,exp] of Object.entries(this.pacts)){
+      const [a,b] = k.split("\u0001").map(n=>n===old?newName:n);
+      np[pairKey(a,b)] = exp;
+    }
+    this.pacts = np;
+    if(this.grudges[old]){ this.grudges[newName] = this.grudges[old]; delete this.grudges[old]; }
+    for(const h of Object.keys(this.grudges)){
+      if(old in this.grudges[h]){ this.grudges[h][newName] = this.grudges[h][old]; delete this.grudges[h][old]; }
+    }
+    if(old in this.playerIntel){ this.playerIntel[newName] = this.playerIntel[old]; delete this.playerIntel[old]; }
+    for(const k of Object.keys(this.eventCooldowns)){
+      if(k.startsWith(old+":")){ this.eventCooldowns[newName+k.slice(old.length)] = this.eventCooldowns[k]; delete this.eventCooldowns[k]; }
+    }
+  }
+
+  form(country, f, log){
+    if(!this.canForm(country, f)) return false;
+    const oldName = country.name;
+    this.renameCountry(country, f.name, f.short, f.flag);
+    this.formed.add(f.id);
+    if(country===this.player && this.objective.id==="formation" && f.id===this.objective.formableId) this.objectiveDone = true;
+    const n = f.needs.length;
+    country.stability = Math.min(100, country.stability + 10);
+    country.resources += 25*n;
+    country.researchPoints += 3*n;
+    country.population = Math.floor(country.population*(1+0.02*n));
+    const up = Math.min(0.30, 0.05*n);
+    for(const u of UNIT_TYPES) country.units[u] = Math.floor(country.units[u]*(1+up));
+    const msg = `${f.flag} ${oldName} proclaims the ${f.name}!`;
+    this.logHistory(msg);
+    log(`🏴 ${msg}`, "good");
+    return true;
+  }
+
+  /* AI nations proclaim formables as soon as they qualify; the player is told and chooses. */
+  checkFormables(log){
+    const list = FORMABLES.slice().sort((a,b)=>b.needs.length-a.needs.length);
+    for(const c of Object.values(this.countries)){
+      if(c===this.player){
+        for(const f of list){
+          if(this.canForm(c,f) && !this.announced.has(f.id)){
+            this.announced.add(f.id);
+            log(`🏴 You hold every territory needed to form the ${f.name}! Open "Form" to proclaim it.`, "good");
+          }
+        }
+        continue;
+      }
+      for(const f of list){
+        if(this.objective.id==="formation" && f.id===this.objective.formableId) continue;   // never snatch the player's goal
+        if(this.canForm(c,f)){ this.form(c,f,log); break; }
+      }
+    }
+  }
+
+  randomEvent(log){
+    if(Math.random() > 0.35) return;
+    const list = Object.values(this.countries);
+    if(!list.length) return;
+    const country = choice(list);
+    const [title, stat, amount, template] = choice(RANDOM_EVENTS);
+    if(stat==="res") country.resources = Math.max(0, country.resources+amount);
+    else country.units[stat] = Math.max(0, country.units[stat]+amount);
+    log(`📰 ${title} — ${template.replace("{n}", `${country.flag} ${country.name}`)}`, "note");
+  }
+
+  /* Advance the objective's "held for N turns/months" counter. Call exactly once per turn/month
+     (checkVictory is called from several places and must not mutate state). */
+  territoryShares(){
+    const totalT = Object.values(this.countries).reduce((s,c)=>s+c.territory.size,0) || 1;
+    const mine = this.player.territory.size;
+    const withAllies = mine + [...this.player.allies].reduce((s,a)=> this.countries[a] ? s+this.countries[a].territory.size : s, 0);
+    return {mine: mine/totalT, withAllies: withAllies/totalT};
+  }
+  bestRivalPower(){
+    const others = Object.values(this.countries).filter(c=>c!==this.player).map(c=>c.powerScore);
+    return others.length ? Math.max(...others) : 0;
+  }
+  updateStreaks(){
+    if(!(this.player.name in this.countries)) return;
+    const o = this.objective.id, sh = this.territoryShares();
+    let ok = false;
+    if(o==="conquest") ok = sh.mine >= CONQUEST_SHARE;
+    else if(o==="economic") ok = this.player.resources >= ECONOMIC_VICTORY_RESOURCES;
+    else if(o==="alliance") ok = sh.withAllies >= ALLIANCE_DOMINANCE_PCT;
+    else if(o==="superpower") ok = this.player.powerScore >= this.bestRivalPower()*SUPERPOWER_MARGIN;
+    this.objStreak = ok ? this.objStreak+1 : 0;
+  }
+  limitText(){ return `${this.maxYears} years have passed (${this.dateString()})`; }
+  whenText(){ return this.dateString(); }
+  objectiveProgress(){
+    const o = this.objective.id, p = this.player, need = OBJ_STREAK[o];
+    const sh = this.territoryShares(), pct = x => `${(x*100).toFixed(0)}%`;
+    const streak = need ? ` · held ${this.objStreak}/${need} ${STREAK_UNIT}` : "";
+    if(o==="conquest") return `🌍 World Conquest: ${pct(sh.mine)} of the ${pct(CONQUEST_SHARE)} needed${streak}`;
+    if(o==="economic") return `💰 Economic: ${fmt(p.resources)} / ${fmt(ECONOMIC_VICTORY_RESOURCES)} resources${streak}`;
+    if(o==="alliance") return `🤝 Alliance: ${pct(sh.withAllies)} of the ${pct(ALLIANCE_DOMINANCE_PCT)} needed${streak}`;
+    if(o==="superpower") return `👑 Superpower: power ${p.powerScore.toFixed(0)} vs rival ${this.bestRivalPower().toFixed(0)} (need ×${SUPERPOWER_MARGIN})${streak}`;
+    if(o==="technology") return `🔬 Tech Supremacy: ${p.researched.size}/${Object.keys(TECH_TREE).length} researched`;
+    if(o==="formation"){
+      const f = FORMABLES.find(x=>x.id===this.objective.formableId);
+      if(!f) return "🏴 Nation Builder";
+      return `🏴 ${f.name}: ${this.formableProgress(p,f).have.length}/${f.needs.length} territories`;
+    }
+    if(o==="survival") return `🛡 Survival: ${this.maxYears>0 ? `${Math.max(0, Math.ceil(this.maxYears - this.yearsElapsed()))} years left` : "no time limit set"}`;
+    return "🧭 Sandbox: no win condition";
+  }
+  checkVictory(){
+    if(!(this.player.name in this.countries)) return "defeat";
+    if(Object.keys(this.countries).length===1) return "conquest";
+    const o = this.objective.id;
+    if(OBJ_STREAK[o] && this.objStreak >= OBJ_STREAK[o]) return o;
+    if(o==="technology" && this.player.researched.size >= Object.keys(TECH_TREE).length) return "technology";
+    if(o==="formation" && this.objectiveDone) return "formation";
+    if(this.day >= this.maxYears*365 && this.maxYears>0) return o==="survival" ? "survived" : "turnlimit";
+    return null;
+  }
+
+  /* ---- AI turn: returns a proposal object if it needs the player's answer, else null ---- */
+  aiTurn(country, log){
+    if(country===this.player || !(country.name in this.countries)) return null;
+    const others = Object.values(this.countries).filter(c=>c!==country);
+    if(!others.length) return null;
+
+    const aggression = DIFFICULTIES[this.difficulty].aiAggression;
+    const avgPower = this.averagePower();
+    const leader = Object.values(this.countries).reduce((a,b)=> b.powerScore>a.powerScore ? b : a);
+    const isLeaderRunaway = leader.powerScore > avgPower*1.8;
+
+    if(country.units.nukes>=1 && country.powerScore < avgPower*0.5 && Math.random()<0.15 && this.canReachWithNuke(country, leader)){
+      this.useNuke(country, leader, true, log);
+      return null;
+    }
+
+    const roll = Math.random();
+
+    if(roll < 0.12 && country.allies.size < 2){
+      const pool = others.filter(c=>!country.allies.has(c.name) && this.grudge(country.name,c.name) < 30);
+      if(pool.length){
+        const cand = choice(pool);
+        if(cand===this.player){
+          return {type:"alliance", from:country};
+        } else if(Math.random() < this.allianceAcceptChance(country, cand)){
+          country.allies.add(cand.name); cand.allies.add(country.name);
+        }
+      }
+      return null;
+    }
+
+    if(roll < 0.20){
+      const pool = others.filter(c=>!this.hasPact(country.name,c.name) && !country.allies.has(c.name));
+      if(pool.length){
+        const cand = choice(pool);
+        if(cand===this.player){
+          return {type:"pact", from:country};
+        } else if(Math.random() < 0.5){
+          this.pacts[pairKey(country.name, cand.name)] = this.turn+8;
+        }
+      }
+      return null;
+    }
+
+    if(roll < 0.32){
+      if(country.resources > 40){
+        const invest = Math.min(country.resources-20, RESOURCES_PER_RP*6);
+        const gained = Math.floor(invest/RESOURCES_PER_RP);
+        if(gained>0){ country.resources -= gained*RESOURCES_PER_RP; country.researchPoints += gained; }
+      }
+      const available = country.availableTechs();
+      const affordable = available.filter(t=>TECH_TREE[t].cost <= country.researchPoints);
+      if(affordable.length){
+        const priority = affordable.filter(t=>t!=="nuclear_program");
+        country.researchTech(choice(priority.length?priority:affordable));
+      }
+      return null;
+    }
+
+    if(country.powerScore < avgPower*0.85 && country.resources>20 && roll<0.68){
+      if(country.hasTech("nuclear_program") && country.resources>250 && country.units.nukes===0 && Math.random()<0.15){
+        country.buildUnit("nukes",1);
+      } else {
+        const weights = {infantry:0.5, navy:0.25, air:0.25};
+        const utype = weightedChoice(weights);
+        const amt = Math.max(1, Math.floor(country.resources*0.3/BUILD_COSTS[utype]));
+        country.buildUnit(utype, amt);
+      }
+      return null;
+    }
+
+    let options = this.getAttackable(country).filter(o=>!this.hasPact(country.name, o.target.name));
+    if(this.turn <= AI_GRACE_TURNS) options = options.filter(o=>o.target!==this.player);
+    if(!options.length) return null;
+
+    const scored = options.map(o=>{
+      let score = -o.target.powerScore - (o.overseas ? AI_OVERSEAS_PENALTY : 0); // prefer land neighbours, so weak nations aren't dog-piled from across the world
+      score += this.grudge(country.name, o.target.name)*2;
+      if(isLeaderRunaway && o.target===leader && Math.random()<0.2*aggression) score += 150;
+      return {o, score};
+    }).sort((a,b)=>b.score-a.score);
+    const topN = scored.length>1 ? scored.slice(0, Math.max(1, Math.floor(scored.length/2))) : scored;
+    const pick = Math.random()<0.4 ? choice(topN) : scored[0];
+
+    if(Math.random() < AI_ATTACK_CHANCE*aggression){
+      const involvesPlayer = pick.o.target===this.player;
+      this.resolveAttack(country, pick.o.target, pick.o.territory, pick.o.overseas, involvesPlayer, log);
+    }
+    return null;
+  }
+
+  toJSON(){
+    return {
+      turn:this.turn, day:this.day, maxYears:this.maxYears, cooldowns:this.cooldowns, difficulty:this.difficulty, playerName:this.player.name,
+      history:this.history, eventCooldowns:this.eventCooldowns, formed:[...this.formed],
+      countries: Object.fromEntries(Object.entries(this.countries).map(([n,c])=>[n,c.toJSON()])),
+      pacts:this.pacts, grudges:this.grudges, playerIntel:this.playerIntel,
+      objective:this.objective, objStreak:this.objStreak, objectiveDone:this.objectiveDone,
+    };
+  }
+  static fromJSON(d){
+    const g = new Game();
+    g.turn = d.turn; g.difficulty = d.difficulty;
+    g.day = d.day || 0; g.maxYears = d.maxYears || 0; g.cooldowns = d.cooldowns || {};
+    nukeCap = nukeCapFor(g.maxYears);
+    g.history = d.history || []; g.eventCooldowns = d.eventCooldowns || {};
+    g.formed = new Set(d.formed || []);
+    g.countries = Object.fromEntries(Object.entries(d.countries).map(([n,c])=>[n,Country.fromJSON(c)]));
+    g.player = g.countries[d.playerName];
+    g.pacts = d.pacts; g.grudges = d.grudges; g.playerIntel = d.playerIntel;
+    g.objective = d.objective || {id:"sandbox", formableId:null}; g.objStreak = d.objStreak || 0; g.objectiveDone = !!d.objectiveDone;
+    return g;
+  }
+}
+
+function weightedChoice(weights){
+  const keys = Object.keys(weights);
+  const total = keys.reduce((s,k)=>s+weights[k],0);
+  let r = Math.random()*total;
+  for(const k of keys){ if(r < weights[k]) return k; r -= weights[k]; }
+  return keys[keys.length-1];
+}
+
+/* ============================== UI ============================== */
+
+const app = document.getElementById("app");
+let game = null;
+let drawerMode = null; // current open action drawer
+
+function render(){
+  if(!game){ renderSetup(); return; }
+  const outcome = game.checkVictory();
+  if(outcome){ renderEnd(outcome); return; }
+  renderGame();
+}
+
+/* ---------- Setup screen ---------- */
+let setupDifficulty = "normal";
+let setupObjective = "conquest";
+let setupFormable = "ussr";
+let setupYears = DEFAULT_YEARS;
+
+function renderSetup(){
+  const savedRaw = localStorage.getItem(SAVE_KEY);
+  app.innerHTML = `
+    <div class="banner">
+      <h1>World Conqueror</h1><div class="byline">Made by Reedman27</div>
+      <div class="sub">geography · diplomacy · espionage · the bomb</div>
+    </div>
+    <p class="lede">It is <em>26 December 1991</em>. The Soviet Union has just dissolved and fifteen new
+      nations stand where it was. Pick a nation and steer it through a run of conquest, alliances and
+      brinkmanship — in real time, day by day, until the game is won or lost. Attack only reaches
+      land-adjacent territory unless you build a navy. Nuclear stockpiles are capped, and the cap grows with
+      the length of the game. Watch your government too: low stability invites elections, coups, and even civil war.</p>
+
+    ${savedRaw ? `
+      <div class="panel" style="margin-bottom:22px;">
+        <h2>Continue</h2>
+        <p style="color:var(--text-dim); font-size:12.5px; margin:0 0 12px;">A game in progress was found on this device.</p>
+        <div class="row-inline">
+          <button class="btn" id="btn-continue">Resume game</button>
+          <button class="btn ghost" id="btn-discard">Start fresh instead</button>
+        </div>
+      </div>
+    ` : ``}
+
+    <p class="section-label">How do you want to win?</p>
+    <div class="diff-row" id="obj-row" style="margin-bottom:12px;">
+      ${Object.entries(OBJECTIVES).map(([key,o])=>`
+        <button class="diff-btn ${key===setupObjective?'selected':''}" data-obj="${key}">
+          <span class="name">${o.icon} ${o.name}</span>
+          <span class="desc">${o.desc}</span>
+        </button>
+      `).join("")}
+    </div>
+    ${setupObjective==="formation" ? `<div class="row-inline" style="margin:0 0 24px;">
+      <span style="color:var(--text-dim); font-size:12.5px;">Nation to build:</span>
+      <select id="form-target">${FORMABLES.map(f=>`<option value="${f.id}" ${f.id===setupFormable?'selected':''}>${f.flag} ${f.name} (${f.needs.length} territories)</option>`).join("")}</select>
+    </div>` : `<div style="height:16px;"></div>`}
+
+    <p class="section-label">Difficulty</p>
+    <div class="diff-row" id="diff-row">
+      ${Object.entries(DIFFICULTIES).map(([key,d])=>`
+        <button class="diff-btn ${key===setupDifficulty?'selected':''}" data-diff="${key}">
+          <span class="name">${d.label}</span>
+          <span class="desc">${d.desc}</span>
+        </button>
+      `).join("")}
+    </div>
+
+    <p class="section-label">Game length</p>
+    <div class="row-inline" style="margin-bottom:24px;">
+      <select id="game-length">
+        ${[[0,"Until it's over"],[10,"10 years"],[25,"25 years"],[50,"50 years"],[100,"100 years"]].map(([v,l])=>`<option value="${v}" ${v===setupYears?'selected':''}>${l}</option>`).join("")}
+      </select>
+      <span style="color:var(--muted); font-size:12px;">Nuke stockpile cap = 15 + ½ per year of game length (open-ended games use 50 years).</span>
+    </div>
+
+    <p class="section-label">Choose your nation</p>
+    <div class="country-grid" id="country-grid">
+      ${Object.entries(COUNTRIES_DATA).sort((a,b)=> (b[1].mil+b[1].res) - (a[1].mil+a[1].res)).map(([name,d])=>`
+        <button class="country-card" data-country="${esc(name)}">
+          <div class="row1"><span class="flag">${d.flag}</span><span class="cname">${esc(name)}</span></div>
+          <div class="stat-line"><span>pop</span><span>${fmt(d.pop)}</span></div>
+          <div class="stat-line"><span>resources</span><span>${d.res}</span></div>
+          <div class="stat-line"><span>military</span><span>${d.mil}</span></div>
+        </button>
+      `).join("")}
+    </div>
+    <p class="credit">World Conqueror · made by <b>Reedman27</b> · <a href="https://github.com/Reedman27/World-conquer" target="_blank" rel="noopener" style="color:inherit">github.com/Reedman27/World-conquer</a></p>
+  `;
+
+  if(savedRaw){
+    document.getElementById("btn-continue").onclick = () => {
+      try{
+        game = Game.fromJSON(JSON.parse(savedRaw));
+        drawerMode = null;
+        render();
+        speedIdx = 1; blocking = 0; startClock();
+      }catch(e){
+        localStorage.removeItem(SAVE_KEY);
+        render();
+      }
+    };
+    document.getElementById("btn-discard").onclick = () => { localStorage.removeItem(SAVE_KEY); render(); };
+  }
+
+  document.querySelectorAll("#diff-row .diff-btn").forEach(btn=>{
+    btn.onclick = () => { setupDifficulty = btn.dataset.diff; renderSetup(); };
+  });
+  document.querySelectorAll("#obj-row .diff-btn").forEach(btn=>{
+    btn.onclick = () => { setupObjective = btn.dataset.obj; renderSetup(); };
+  });
+  const formSel = document.getElementById("form-target");
+  if(formSel) formSel.onchange = () => { setupFormable = formSel.value; };
+  const lengthSel = document.getElementById("game-length");
+  lengthSel.onchange = () => { setupYears = parseInt(lengthSel.value, 10) || 0; };
+  document.querySelectorAll(".country-card").forEach(btn=>{
+    btn.onclick = () => {
+      setupYears = parseInt(lengthSel.value, 10) || 0;
+      if(setupObjective==="survival" && !setupYears) setupYears = 25;   // survival needs an end date
+      game = new Game();
+      const objective = {id:setupObjective, formableId: setupObjective==="formation" ? setupFormable : null};
+      game.setup(btn.dataset.country, setupDifficulty, setupYears, objective);
+      logBuffer = [];
+      beginGame();
+    };
+  });
+}
+
+/* ---------- Log ---------- */
+let logBuffer = [];
+let logVersion = 0;
+function pushLog(msg, cls){
+  logVersion++;
+  logBuffer.push({msg, cls: cls||"info"});
+  if(logBuffer.length > 400) logBuffer = logBuffer.slice(-400);
+}
+function renderLogHTML(){
+  return logBuffer.map(l=>`<p class="t-${l.cls}">${esc(l.msg)}</p>`).join("");
+}
+function scrollLogToBottom(){
+  const el = document.getElementById("log-box");
+  if(el) el.scrollTop = el.scrollHeight;
+}
+
+/* ---------- Real-time clock ---------- */
+
+let speedIdx = 1, clockTimer = null, blocking = 0, lastActionKey = null;
+
+function stopClock(){ if(clockTimer){ clearInterval(clockTimer); clockTimer = null; } }
+function startClock(){
+  stopClock();
+  const ms = SPEEDS[speedIdx].ms;
+  if(ms) clockTimer = setInterval(tick, ms);
+}
+function setSpeed(i){ speedIdx = i; startClock(); refreshLive(); }
+
+function beginGame(){
+  speedIdx = 1; blocking = 0; drawerMode = null; lastActionKey = null;
+  pushLog(`— ${game.dateString()} — The Soviet Union has dissolved. A new world order begins. —`, "head");
+  autosave();
+  renderGame();
+  startClock();
+}
+
+function endIfOver(){
+  const outcome = game.checkVictory();
+  if(!outcome) return false;
+  stopClock(); autosave(); render();
+  return true;
+}
+
+function tick(){
+  if(blocking>0 || !game) return;
+  const res = game.stepDay(pushLog);
+  if(endIfOver()) return;
+  if(game.day % DAYS_PER_MONTH === 0) autosave();
+  refreshLive();
+  handleStep(res);
+}
+
+function handleStep(res){
+  if(res.decision){
+    blocking++;
+    showDecisionEvent(res.decision, () => {
+      blocking--; refreshLive();
+      if(res.proposal) handleStep({proposal:res.proposal});
+    });
+    return;
+  }
+  if(res.proposal){
+    blocking++;
+    showProposal(res.proposal, () => { blocking--; refreshLive(); });
+  }
+}
+
+/* Called when the player finishes an action: starts that action's cooldown. */
+function afterPlayerAction(cooldownDays){
+  const key = lastActionKey;
+  if(key && ACTION_COOLDOWNS[key]!=null) game.cooldowns[key] = game.day + (cooldownDays ?? ACTION_COOLDOWNS[key]);
+  drawerMode = null;
+  if(endIfOver()) return;
+  renderGame();
+}
+
+function showProposal(proposal, resume){
+  const country = proposal.from;
+  const label = proposal.type==="alliance" ? "proposes a full ALLIANCE" : "proposes a NON-AGGRESSION PACT";
+  const overlay = document.createElement("div");
+  overlay.className = "overlay";
+  overlay.innerHTML = `
+    <div class="modal">
+      <h3>${country.flag} ${esc(country.name)}</h3>
+      <p>${esc(country.name)} ${label} with you. Accept?</p>
+      <div class="btnrow">
+        <button class="btn" id="prop-yes">Accept</button>
+        <button class="btn ghost" id="prop-no">Decline</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.querySelector("#prop-yes").onclick = () => {
+    if(proposal.type==="alliance"){
+      country.allies.add(game.player.name); game.player.allies.add(country.name);
+      pushLog(`🤝 Alliance formed with ${country.flag} ${country.name}.`, "good");
+    } else {
+      game.pacts[pairKey(country.name, game.player.name)] = game.turn+8;
+      pushLog(`📜 Non-aggression pact signed with ${country.flag} ${country.name} (8 months).`, "good");
+    }
+    document.body.removeChild(overlay);
+    resume();
+  };
+  overlay.querySelector("#prop-no").onclick = () => {
+    pushLog(`You declined ${country.name}'s ${proposal.type==="alliance"?"alliance":"pact"} offer.`, "info");
+    document.body.removeChild(overlay);
+    resume();
+  };
+}
+
+function showDecisionEvent(pending, resume){
+  const { event, country } = pending;
+  const overlay = document.createElement("div");
+  overlay.className = "overlay";
+  overlay.innerHTML = `
+    <div class="modal">
+      <h3>${event.title}</h3>
+      <p>${esc(event.describe(game, country))}</p>
+      <div class="btnrow" style="flex-direction:column; align-items:stretch; gap:8px;">
+        ${event.options.map((opt,i)=>`<button class="btn ghost" data-i="${i}" style="text-align:left;">${esc(opt[0])}</button>`).join("")}
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.querySelectorAll("button[data-i]").forEach(btn=>{
+    btn.onclick = () => {
+      const [label, effect] = event.options[parseInt(btn.dataset.i,10)];
+      effect(game, country);
+      game.logHistory(`You (${country.name}): ${event.title} → "${label}"`);
+      pushLog(`${event.title} — you chose: ${label}`, "note");
+      document.body.removeChild(overlay);
+      resume();
+    };
+  });
+}
+
+/* In-page confirm dialog. window.confirm() is silently blocked in sandboxed previews/iframes,
+   which made buttons that relied on it do nothing. */
+function askConfirm(message, onYes){
+  const overlay = document.createElement("div");
+  overlay.className = "overlay";
+  overlay.innerHTML = `<div class="modal"><p style="color:var(--text);">${esc(message)}</p>
+    <div class="btnrow"><button class="btn danger" id="cf-yes">Confirm</button><button class="btn ghost" id="cf-no">Cancel</button></div></div>`;
+  document.body.appendChild(overlay);
+  blocking++;
+  overlay.querySelector("#cf-no").onclick = () => { overlay.remove(); blocking--; };
+  overlay.querySelector("#cf-yes").onclick = () => { overlay.remove(); blocking--; onYes(); };
+}
+
+function autosave(){
+  try{ localStorage.setItem(SAVE_KEY, JSON.stringify(game.toJSON())); }catch(e){}
+}
+
+/* ---------- Main game screen ---------- */
+
+function ideologyBarsHTML(country){
+  return `<div style="margin-top:10px; display:flex; flex-direction:column; gap:5px;">
+    ${Object.entries(IDEOLOGIES).map(([id,info])=>{
+      const pct = country.ideologySupport[id] || 0;
+      const ruling = id===country.government;
+      return `<div style="font-size:11px;">
+        <div style="display:flex; justify-content:space-between; color:var(--text-dim); margin-bottom:2px;">
+          <span>${info.name}${ruling?' (ruling)':''}</span><span>${pct.toFixed(0)}%</span>
+        </div>
+        <div style="height:5px; background:var(--bg-2); border:1px solid var(--border-soft);">
+          <div style="height:100%; width:${clamp(pct,0,100)}%; background:${info.color};"></div>
+        </div>
+      </div>`;
+    }).join("")}
+  </div>`;
+}
+
+function cooldownLeft(key){ return Math.max(0, (game.cooldowns[key]||0) - game.day); }
+
+function clockHTML(){
+  const p = game.player;
+  const year = Math.floor(game.yearsElapsed()) + 1;
+  return `📅 <b>${game.dateString()}</b> &nbsp;·&nbsp; Year ${year}${game.maxYears?` / ${game.maxYears}`:""}
+    &nbsp;·&nbsp; ${DIFFICULTIES[game.difficulty].label} &nbsp;·&nbsp; ${p.flag} ${esc(p.name)}${speedIdx===0?' &nbsp;·&nbsp; <b style="color:var(--accent)">PAUSED</b>':''}`;
+}
+
+function nationPanelHTML(){
+  const p = game.player;
+  const totalT = Object.values(game.countries).reduce((s,c)=>s+c.territory.size,0);
+  const myShare = (p.territory.size + [...p.allies].reduce((s,a)=> game.countries[a]?s+game.countries[a].territory.size:s,0)) / Math.max(1,totalT);
+  const techs = [...p.researched].map(t=>TECH_TREE[t].name).join(", ") || "None";
+  const pacts = Object.keys(game.pacts).filter(k=>k.split("\u0001").includes(p.name))
+    .map(k=>{ const other = k.split("\u0001").find(n=>n!==p.name); return `${other} (${Math.max(0,game.pacts[k]-game.turn)} mo)`; }).join(", ") || "None";
+  return `
+    <h2>${p.flag} ${esc(p.name)}</h2>
+    <table class="stat-table">
+      <tr><td>Population</td><td>${fmt(p.population)}</td></tr>
+      <tr><td>Resources</td><td>${fmt(p.resources)}</td></tr>
+      <tr><td>Units</td><td>
+        <span class="unit-chip">${UNIT_ICON.infantry} <b>${p.units.infantry}</b></span>
+        <span class="unit-chip">${UNIT_ICON.navy} <b>${p.units.navy}</b></span>
+        <span class="unit-chip">${UNIT_ICON.air} <b>${p.units.air}</b></span>
+        <span class="unit-chip">${UNIT_ICON.nukes} <b>${p.units.nukes}</b>/${nukeCap}</span>
+      </td></tr>
+      <tr><td>Territory</td><td>${[...p.territory].map(esc).join(", ")}</td></tr>
+      <tr><td>Allies</td><td>${[...p.allies].map(esc).join(", ") || "None"}</td></tr>
+      <tr><td>NAPs</td><td>${esc(pacts)}</td></tr>
+      <tr><td>Research</td><td>${p.researchPoints.toFixed(1)} RP<br><span style="color:var(--muted)">${esc(techs)}</span></td></tr>
+      <tr><td>Power score</td><td>${p.powerScore.toFixed(1)}</td></tr>
+      <tr><td>World share</td><td>${(myShare*100).toFixed(1)}%</td></tr>
+            <tr><td>Objective</td><td>${esc(game.objectiveProgress())}</td></tr>
+      <tr><td>Nations left</td><td>${Object.keys(game.countries).length}</td></tr>
+    </table>`;
+}
+
+function govPanelHTML(){
+  const p = game.player;
+  return `
+    <h2>Government</h2>
+    <table class="stat-table">
+      <tr><td>System</td><td style="color:${IDEOLOGIES[p.government].color}">${IDEOLOGIES[p.government].name}</td></tr>
+      <tr><td>Stability</td><td>${p.stability.toFixed(0)}%</td></tr>
+      <tr><td>Leader</td><td>${esc(p.leader.name)} <span style="color:var(--muted)">(${p.leader.approval.toFixed(0)}% approval)</span></td></tr>
+    </table>
+    ${ideologyBarsHTML(p)}`;
+}
+
+let shownLogVersion = -1;
+/* Cheap per-day refresh of the live parts of the screen (never touches the open drawer). */
+function refreshLive(force){
+  if(!game) return;
+  const clock = document.getElementById("clock-line");
+  if(!clock) return;
+  clock.innerHTML = clockHTML();
+  document.querySelectorAll(".spd").forEach(b=> b.classList.toggle("selected", parseInt(b.dataset.spd,10)===speedIdx));
+  document.getElementById("panel-nation").innerHTML = nationPanelHTML();
+  document.getElementById("panel-gov").innerHTML = govPanelHTML();
+  document.querySelectorAll(".act-btn").forEach(btn=>{
+    const left = cooldownLeft(btn.dataset.act);
+    btn.disabled = left>0;
+    btn.querySelector(".cd").textContent = left>0 ? `${left}d` : "";
+  });
+  const box = document.getElementById("log-box");
+  if(box && (force || shownLogVersion!==logVersion)){
+    const nearBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 40;
+    box.innerHTML = renderLogHTML();
+    if(force || nearBottom) box.scrollTop = box.scrollHeight;
+    shownLogVersion = logVersion;
+  }
+}
+
+function renderGame(){
+  const ACTIONS = [["attack","⚔","Attack"],["continent","🌐","Continent"],["build","🏗","Build"],["research","🔬","Research"],
+    ["politics","🏛","Politics"],["alliance","🤝","Alliance"],["pact","📜","Pact"],["merge","🏳","Merge"],["form","🏴","Form"],
+    ["spy","🕵","Spy"],["nuke","☢","Nuke"],["world","🗺","World"]];
+  app.innerHTML = `
+    <div class="banner">
+      <h1>World Conqueror</h1><div class="byline">Made by Reedman27</div>
+      <div class="turnbox">
+        <div id="clock-line"></div>
+        <div class="speed-row">${SPEEDS.map((sp,i)=>`<button class="spd" data-spd="${i}" title="${i===0?'Pause':sp.label+' speed'}">${sp.label}</button>`).join("")}</div>
+      </div>
+    </div>
+    <div class="game-grid">
+      <div>
+        <div class="panel" id="panel-nation"></div>
+        <div class="panel" id="panel-gov"></div>
+        <div class="panel">
+          <h2>Actions</h2>
+          <div class="action-grid">
+            ${ACTIONS.map(([id,icon,label])=>`<button class="act-btn" data-act="${id}"><span class="k">${icon}</span>${label}<span class="cd"></span></button>`).join("")}
+          </div>
+          <p class="hint" style="margin-top:10px;">The world moves in real time. Actions have cooldowns. Space pauses, 1–4 change speed, Esc closes a panel. The game auto-pauses when you switch tabs.</p>
+        </div>
+      </div>
+
+      <div>
+        <div class="panel">
+          <h2>Dispatches</h2>
+          <div class="log" id="log-box"></div>
+        </div>
+        <div id="drawer-slot"></div>
+      </div>
+    </div>
+    <p class="credit">World Conqueror · made by <b>Reedman27</b> · <a href="https://github.com/Reedman27/World-conquer" target="_blank" rel="noopener" style="color:inherit">github.com/Reedman27/World-conquer</a></p>
+  `;
+
+  document.querySelectorAll(".spd").forEach(b=>{ b.onclick = () => setSpeed(parseInt(b.dataset.spd,10)); });
+  document.querySelectorAll(".act-btn").forEach(btn=>{
+    btn.onclick = () => {
+      if(cooldownLeft(btn.dataset.act)>0) return;
+      lastActionKey = btn.dataset.act; drawerMode = btn.dataset.act; renderDrawer();
+    };
+  });
+  refreshLive(true);
+  if(drawerMode) renderDrawer(); else document.getElementById("drawer-slot").innerHTML = "";
+}
+
+/* ---------- Action drawers ---------- */
+
+function drawerHost(){ return document.getElementById("drawer-slot"); }
+function closeDrawer(){ drawerMode = null; renderGame(); }
+
+function renderDrawer(){
+  const host = drawerHost();
+  if(!host) return;
+  const p = game.player;
+
+  if(drawerMode==="world"){
+    const countryList = Object.values(game.countries);
+    const rows = countryList.slice().sort((a,b)=>b.powerScore-a.powerScore).map(c=>{
+      const s = game.displayStats(c, true);
+      return `<tr class="${c===p?'me':''}"><td>${c.flag}</td><td>${esc(c.name)}</td><td>${fmt(s.pop)}</td><td>${s.res}${s.known?'':' ?'}</td><td>${s.mil}${s.known?'':' ?'}</td></tr>`;
+    }).join("");
+
+    const rankRows = countryList.slice().sort((a,b)=>b.powerScore-a.powerScore).slice(0,10).map((c,i)=>
+      `<div class="target-row" style="cursor:default;"><span class="l">${i+1}. ${c.flag} ${esc(c.name)}${c===p?' (you)':''}</span><span class="r">${c.powerScore.toFixed(1)}</span></div>`
+    ).join("");
+
+    function topList(label, keyFn){
+      const top5 = countryList.slice().sort((a,b)=>keyFn(b)-keyFn(a)).slice(0,5);
+      return `<div style="margin-bottom:8px;"><div style="color:var(--accent); font-size:12px; margin-bottom:4px;">Top ${label}</div>
+        ${top5.map((c,i)=>`<div style="font-size:11.5px; color:var(--text-dim);">${i+1}. ${c.flag} ${esc(c.short)}</div>`).join("")}
+      </div>`;
+    }
+
+    const historyRows = game.history.slice(-30).reverse().map(h=>
+      `<p class="t-info">${esc(h.date||"")}: ${esc(h.text)}</p>`
+    ).join("") || `<p class="t-info">Nothing notable has happened yet.</p>`;
+
+    host.innerHTML = `<div class="drawer">
+      <h3>World standings</h3>
+      <table class="worldtable"><tr><th></th><th>Nation</th><th>Pop</th><th>Res</th><th>Mil</th></tr>${rows}</table>
+
+      <h3 style="margin-top:18px;">World power ranking</h3>
+      <div class="target-list" style="max-height:200px;">${rankRows}</div>
+      <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-top:10px;">
+        ${topList("Military", c=>c.military)}
+        ${topList("Resources", c=>c.resources)}
+        ${topList("Population", c=>c.population)}
+        ${topList("Research", c=>c.researched.size)}
+      </div>
+
+      <h3 style="margin-top:18px;">World history</h3>
+      <div class="log" style="height:180px;">${historyRows}</div>
+
+      <div class="row-inline" style="margin-top:12px;"><button class="btn ghost" id="d-close">Close</button></div>
+    </div>`;
+    host.querySelector("#d-close").onclick = closeDrawer;
+    return;
+  }
+
+  if(drawerMode==="continent"){
+    const byContinent = game.getAttackableByContinent(p);
+    const continents = Object.keys(byContinent);
+    if(!continents.length){
+      host.innerHTML = drawerWrap("Continental offensive", `<p class="hint">No reachable territory on any continent right now.</p>`);
+      wireClose(host); return;
+    }
+    const rows = continents.map(cont=>{
+      const n = byContinent[cont].length;
+      const mult = game.offensivePower(n);
+      return `<div class="target-row" data-cont="${esc(cont)}">
+        <span class="l">${esc(cont)}</span>
+        <span class="r">${n} territories · ${(mult*100).toFixed(0)}% power/front</span>
+      </div>`;
+    }).join("");
+    host.innerHTML = drawerWrap("Continental offensive", `
+      <p class="hint">Strikes every reachable territory on one continent in a single sweep. Spreading your
+        forces across more fronts reduces the power behind each individual attack. starts a cooldown.</p>
+      <div class="target-list">${rows}</div>
+    `);
+    wireClose(host);
+    host.querySelectorAll(".target-row").forEach(row=>{
+      row.onclick = () => {
+        const cont = row.dataset.cont;
+        const targets = byContinent[cont];
+        renderContinentConfirm(host, cont, targets);
+      };
+    });
+    return;
+  }
+
+  if(drawerMode==="politics"){
+    host.innerHTML = drawerWrap(`Politics — ${p.flag} ${esc(p.name)}`, `
+      <table class="stat-table" style="margin-bottom:10px;">
+        <tr><td>Government</td><td style="color:${IDEOLOGIES[p.government].color}">${IDEOLOGIES[p.government].name}</td></tr>
+        <tr><td>Stability</td><td>${p.stability.toFixed(0)}%</td></tr>
+        <tr><td>Leader</td><td>${esc(p.leader.name)} (${p.leader.approval.toFixed(0)}% approval)</td></tr>
+      </table>
+      ${ideologyBarsHTML(p)}
+      <div class="row-inline" style="margin-top:14px;">
+        <select id="pol-newgov">
+          ${Object.entries(IDEOLOGIES).filter(([id])=>id!==p.government).map(([id,i])=>`<option value="${id}">${i.name}</option>`).join("")}
+        </select>
+        <button class="btn danger" id="pol-change">Change government (${GOV_CHANGE_COST} res)</button>
+      </div>
+      <p class="hint" style="margin-top:6px;">Switching government costs ${GOV_CHANGE_COST} resources, installs a new leader and costs ${GOV_CHANGE_STABILITY} stability. starts a cooldown.</p>
+      <div class="row-inline" style="margin-top:10px;">
+        <button class="btn" id="pol-campaign">Campaign for ${IDEOLOGIES[p.government].name} (20 res)</button>
+        <button class="btn danger" id="pol-suppress">Suppress ${IDEOLOGIES[p.leadingRivalIdeology()].name} (25 res)</button>
+      </div>
+      <p class="hint" style="margin-top:8px;">Either action starts a cooldown.</p>
+    `);
+    wireClose(host);
+    host.querySelector("#pol-change").onclick = () => {
+      const next = host.querySelector("#pol-newgov").value;
+      if(p.resources < GOV_CHANGE_COST){ pushLog(`Not enough resources (need ${GOV_CHANGE_COST}).`, "bad"); renderGame(); return; }
+      askConfirm(`Change your government to ${IDEOLOGIES[next].name}? This costs ${GOV_CHANGE_COST} resources and ${GOV_CHANGE_STABILITY} stability, and starts a cooldown.`, () => {
+      p.resources -= GOV_CHANGE_COST;
+      const old = p.government;
+      p.government = next;
+      p.leader = Leader.random(next);
+      p.stability = Math.max(0, p.stability - GOV_CHANGE_STABILITY);
+      p.shiftIdeology(next, Math.max(0, p.ideologySupport[old] - p.ideologySupport[next] + 15)); // new ideology becomes the leading one
+      const msg = `${p.flag} ${p.name} changes government from ${IDEOLOGIES[old].name} to ${IDEOLOGIES[next].name}. New leader: ${p.leader.name}.`;
+      game.logHistory(msg);
+      pushLog(`🏛 ${msg}`, "note");
+      drawerMode = null; afterPlayerAction(120);
+      });
+    };
+    host.querySelector("#pol-campaign").onclick = () => {
+      const cost = 20;
+      if(p.resources < cost){ pushLog(`Not enough resources (need ${cost}).`, "bad"); renderGame(); return; }
+      p.resources -= cost;
+      p.shiftIdeology(p.government, rand(6,12));
+      pushLog(`📣 Campaign complete. ${IDEOLOGIES[p.government].name} support is now ${p.ideologySupport[p.government].toFixed(1)}%.`, "good");
+      drawerMode = null; afterPlayerAction();
+    };
+    host.querySelector("#pol-suppress").onclick = () => {
+      const rival = p.leadingRivalIdeology();
+      const cost = 25;
+      if(p.resources < cost){ pushLog(`Not enough resources (need ${cost}).`, "bad"); renderGame(); return; }
+      p.resources -= cost;
+      p.shiftIdeology(rival, -rand(8,14));
+      p.stability = Math.max(0, p.stability - rand(2,6));
+      pushLog(`🚨 Suppression complete. ${IDEOLOGIES[rival].name} support is now ${p.ideologySupport[rival].toFixed(1)}%. Stability: ${p.stability.toFixed(0)}%.`, "good");
+      drawerMode = null; afterPlayerAction();
+    };
+    return;
+  }
+
+  if(drawerMode==="attack"){
+    const options = game.getAttackable(p);
+    if(!options.length){
+      host.innerHTML = drawerWrap("Attack", `<p class="hint">No reachable targets. Build a navy to project power overseas, or you're already allied with every neighbor.</p>`);
+      wireClose(host); return;
+    }
+    const byCountry = {};
+    for(const o of options) (byCountry[o.target.name] = byCountry[o.target.name]||[]).push(o);
+    const rows = Object.entries(byCountry).map(([name, opts])=>{
+      const t = opts[0].target;
+      const overseasOnly = opts.every(o=>o.overseas);
+      return `<div class="target-row" data-country="${esc(name)}">
+        <span class="l">${t.flag} ${esc(name)} <span style="color:var(--muted)">(${opts.map(o=>esc(o.territory)).join(", ")})</span></span>
+        <span class="r">${overseasOnly?'navy needed':''} pwr ${t.powerScore.toFixed(0)}</span>
+      </div>`;
+    }).join("");
+    host.innerHTML = drawerWrap("Attack — choose a target", `
+      <p class="hint">Choosing a target uses the action (cooldown applies). Betraying an ally or breaking a pact will be confirmed first.</p>
+      <div class="target-list">${rows}</div>
+    `);
+    wireClose(host);
+    host.querySelectorAll(".target-row").forEach(row=>{
+      row.onclick = () => {
+        const target = game.countries[row.dataset.country]; if(!target){ renderDrawer(); return; }
+        const opts = byCountry[target.name];
+        if(opts.length===1){ confirmAndAttack(target, opts[0]); return; }
+        renderTerritoryPick(host, target, opts);
+      };
+    });
+    return;
+  }
+
+  if(drawerMode==="build"){
+    host.innerHTML = drawerWrap("Build forces", `
+      <p class="hint">Costs — infantry ${costFor('infantry')}, navy ${costFor('navy')}, air ${costFor('air')}, nukes ${BUILD_COSTS.nukes}
+        ${p.hasTech('nuclear_program') ? '' : '<br>(nukes require the Nuclear Program tech)'}. You have ${fmt(p.resources)} resources. Nuke stockpile ${p.units.nukes}/${nukeCap}.</p>
+      <div class="row-inline">
+        <select id="b-type">
+          <option value="infantry">Infantry ${UNIT_ICON.infantry}</option>
+          <option value="navy">Navy ${UNIT_ICON.navy}</option>
+          <option value="air">Air ${UNIT_ICON.air}</option>
+          <option value="nukes">Nuke ${UNIT_ICON.nukes}</option>
+        </select>
+        <input type="number" id="b-amt" min="1" value="1">
+        <button class="btn" id="b-go">Build</button>
+      </div>
+    `);
+    wireClose(host);
+    host.querySelector("#b-go").onclick = () => {
+      const type = host.querySelector("#b-type").value;
+      const amt = parseInt(host.querySelector("#b-amt").value,10) || 0;
+      const {ok, cost} = p.buildUnit(type, amt);
+      if(ok){ pushLog(`🏗 Built ${amt} ${type} for ${cost} resources.`, "good"); drawerMode=null; afterPlayerAction(); }
+      else if(cost===-1){ pushLog("You need the Nuclear Program tech before building nukes.", "bad"); renderGame(); }
+      else if(cost===-2){ pushLog(`Nuclear stockpile cap reached (${nukeCap} warheads).`, "bad"); renderGame(); }
+      else { pushLog(`Not enough resources — needed ${cost}, have ${p.resources}.`, "bad"); renderGame(); }
+    };
+    return;
+  }
+
+  if(drawerMode==="research"){
+    const available = p.availableTechs();
+    const rows = Object.entries(TECH_TREE).map(([id,t])=>{
+      const done = p.researched.has(id);
+      const locked = !done && !t.prereq.every(pr=>p.researched.has(pr));
+      const affordable = !done && !locked && p.researchPoints >= t.cost;
+      return `<div class="tech-row ${done?'done':''} ${locked?'locked':''}" data-tech="${id}" ${done||locked?'':''}>
+        <span><span class="tn">${t.name}${done?' ✓':''}</span><br><span class="td">${t.desc}${t.prereq.length?` — needs ${t.prereq.map(x=>TECH_TREE[x].name).join(", ")}`:''}</span></span>
+        <span class="tc">${done?'done':locked?'locked':(affordable?'':'not enough RP · ')+t.cost+' RP'}</span>
+      </div>`;
+    }).join("");
+    host.innerHTML = drawerWrap("Research", `
+      <p class="hint">You have ${p.researchPoints.toFixed(1)} RP. Convert resources into RP below (free action), or click an available tech to research it (starts a cooldown).</p>
+      <div class="row-inline">
+        <input type="number" id="r-invest" min="0" step="${RESOURCES_PER_RP}" value="${RESOURCES_PER_RP*3}">
+        <button class="btn ghost" id="r-go">Invest resources → RP</button>
+      </div>
+      ${rows}
+    `);
+    wireClose(host);
+    host.querySelector("#r-go").onclick = () => {
+      let amt = parseInt(host.querySelector("#r-invest").value,10) || 0;
+      amt = Math.max(0, Math.min(amt, p.resources));
+      const gained = Math.floor(amt/RESOURCES_PER_RP);
+      if(gained<=0){ pushLog("Not enough resources to convert.", "warn"); renderGame(); return; }
+      p.resources -= gained*RESOURCES_PER_RP;
+      p.researchPoints += gained;
+      pushLog(`🔬 Converted ${gained*RESOURCES_PER_RP} resources into ${gained} RP.`, "good");
+      renderGame(); drawerMode="research"; renderDrawer();
+    };
+    host.querySelectorAll(".tech-row:not(.locked):not(.done)").forEach(row=>{
+      row.onclick = () => {
+        const id = row.dataset.tech;
+        if(p.researchTech(id)){
+          pushLog(`🔬 Researched ${TECH_TREE[id].name}!`, "good");
+          drawerMode = null; afterPlayerAction();
+        } else {
+          pushLog("Not enough RP for that yet.", "warn");
+          renderGame();
+        }
+      };
+    });
+    return;
+  }
+
+  if(drawerMode==="alliance" || drawerMode==="pact"){
+    const isAlliance = drawerMode==="alliance";
+    const candidates = Object.values(game.countries).filter(c=>c!==p && (isAlliance ? !p.allies.has(c.name) : !game.hasPact(p.name,c.name)));
+    const rows = candidates.map(c=>`<div class="target-row" data-country="${esc(c.name)}">
+      <span class="l">${c.flag} ${esc(c.name)}</span><span class="r">pwr ${c.powerScore.toFixed(0)}</span>
+    </div>`).join("") || `<p class="hint">No candidates available.</p>`;
+    host.innerHTML = drawerWrap(isAlliance ? "Propose an alliance" : "Propose a non-aggression pact", `
+      <p class="hint">${isAlliance ? "Allies won't be attackable and can later merge into one nation." : "A pact expires after 8 months."} Choosing a nation starts a cooldown.</p>
+      <div class="target-list">${rows}</div>
+    `);
+    wireClose(host);
+    host.querySelectorAll(".target-row").forEach(row=>{
+      row.onclick = () => {
+        const target = game.countries[row.dataset.country]; if(!target){ renderDrawer(); return; }
+        if(isAlliance){
+          const chance = game.allianceAcceptChance(p, target);
+          if(Math.random() < chance){
+            p.allies.add(target.name); target.allies.add(p.name);
+            pushLog(`🤝 ${target.flag} ${target.name} accepts your alliance offer!`, "good");
+          } else {
+            pushLog(`❌ ${target.flag} ${target.name} rejects your alliance offer.`, "bad");
+          }
+        } else {
+          const chance = clamp(game.allianceAcceptChance(p, target)+0.15, 0.1, 0.97);
+          if(Math.random() < chance){
+            game.pacts[pairKey(p.name, target.name)] = game.turn+8;
+            pushLog(`📜 Non-aggression pact signed with ${target.flag} ${target.name} (8 months).`, "good");
+          } else {
+            pushLog(`❌ ${target.flag} ${target.name} declines the pact.`, "bad");
+          }
+        }
+        drawerMode = null; afterPlayerAction();
+      };
+    });
+    return;
+  }
+
+  if(drawerMode==="form"){
+    const rank = f => game.formed.has(f.id) ? -1 : (game.canForm(p,f) ? 1000 : game.formableProgress(p,f).have.length/f.needs.length);
+    const rows = FORMABLES.slice().sort((a,b)=>rank(b)-rank(a)).map(f=>{
+      const done = game.formed.has(f.id);
+      const ok = game.canForm(p,f);
+      const prog = game.formableProgress(p,f);
+      const missing = prog.missing.slice(0,6).map(t=>{ const h = game.holderOf(t); return `${esc(t)}${h?` (${esc(h.name)})`:""}`; }).join(", ")
+        + (prog.missing.length>6 ? ` +${prog.missing.length-6} more` : "");
+      const status = done ? "proclaimed" : (ok ? "FORM" : `${prog.have.length}/${f.needs.length}`);
+      return `<div class="target-row ${ok?'':'disabled'}" data-f="${f.id}">
+        <span class="l">${game.objective.id==="formation" && game.objective.formableId===f.id ? "⭐ " : ""}${f.flag} ${esc(f.name)}<br><span style="color:var(--muted); font-size:11px;">${done ? 'Already proclaimed' : (ok ? 'You hold every required territory' : 'Missing: '+missing)}</span></span>
+        <span class="r">${status}</span>
+      </div>`;
+    }).join("");
+    host.innerHTML = drawerWrap("Form a nation", `
+      <p class="hint">Hold every territory a formable nation needs (conquered or merged in) and you can proclaim it: your nation is renamed and gains resources, research, population, troops and stability. Each can be formed once per game, and AI nations will form them too. Proclaiming is free.</p>
+      <div class="target-list">${rows}</div>`);
+    wireClose(host);
+    host.querySelectorAll(".target-row:not(.disabled)").forEach(row=>{
+      row.onclick = () => {
+        const f = FORMABLES.find(x=>x.id===row.dataset.f);
+        if(!f || !game.canForm(p,f)){ renderDrawer(); return; }
+        askConfirm(`Proclaim the ${f.name}? Your nation will be renamed.`, () => {
+          if(game.form(p, f, pushLog)){ drawerMode = null; renderGame(); }
+          else renderDrawer();
+        });
+      };
+    });
+    return;
+  }
+
+  if(drawerMode==="merge"){
+    if(!p.allies.size){
+      host.innerHTML = drawerWrap("Merge", `<p class="hint">You have no allies to merge with.</p>`);
+      wireClose(host); return;
+    }
+    const rows = [...p.allies].map(n=>{
+      const c = game.countries[n]; if(!c) return "";
+      return `<div class="target-row" data-country="${esc(n)}"><span class="l">${c.flag} ${esc(n)}</span><span class="r">pwr ${c.powerScore.toFixed(0)}</span></div>`;
+    }).join("");
+    host.innerHTML = drawerWrap("Merge with an ally", `<p class="hint">Fuses both nations permanently into one, combining territory, units and research. starts a cooldown.</p><div class="target-list">${rows}</div>`);
+    wireClose(host);
+    host.querySelectorAll(".target-row").forEach(row=>{
+      row.onclick = () => {
+        const target = game.countries[row.dataset.country]; if(!target){ renderDrawer(); return; }
+        const nn = p.formNation(target);
+        pushLog(`🎉 ${p.flag} ${p.name} and ${target.flag} ${target.name} unite to form ${nn.flag} ${nn.name}!`, "good");
+        nn.allies = new Set([...p.allies, ...target.allies].filter(n=>n!==p.name && n!==target.name));
+        // migrate grudges & pacts
+        for(const oldName of [p.name, target.name]){
+          for(const holder of Object.keys(game.grudges)){
+            if(oldName in (game.grudges[holder]||{})){
+              const v = game.grudges[holder][oldName];
+              game.grudges[holder][nn.name] = Math.max(game.grudges[holder][nn.name]||0, v);
+              delete game.grudges[holder][oldName];
+            }
+          }
+          const newPacts = {};
+          for(const [k,exp] of Object.entries(game.pacts)){
+            const [a,b] = k.split("\u0001").map(n=>n===oldName?nn.name:n);
+            if(a!==b) newPacts[pairKey(a,b)] = exp;
+          }
+          game.pacts = newPacts;
+          delete game.playerIntel[oldName];
+        }
+        for(const other of Object.values(game.countries)){
+          if(other.allies.has(p.name) || other.allies.has(target.name)) other.allies.add(nn.name);
+        }
+        for(const oldName of [p.name, target.name]){
+          const mine = game.grudges[oldName] || {};
+          game.grudges[nn.name] = game.grudges[nn.name] || {};
+          for(const [k,v] of Object.entries(mine)) game.grudges[nn.name][k] = Math.max(game.grudges[nn.name][k]||0, v);
+          delete game.grudges[oldName];
+        }
+        delete game.countries[p.name];
+        delete game.countries[target.name];
+        game.countries[nn.name] = nn;
+        game.player = nn;
+        game.cleanupAfterChange();
+        drawerMode = null; afterPlayerAction();
+      };
+    });
+    return;
+  }
+
+  if(drawerMode==="spy"){
+    const candidates = Object.values(game.countries).filter(c=>c!==p);
+    const rows = candidates.map(c=>`<div class="target-row" data-country="${esc(c.name)}"><span class="l">${c.flag} ${esc(c.name)}</span><span class="r">pwr ${c.powerScore.toFixed(0)}</span></div>`).join("");
+    host.innerHTML = drawerWrap("Espionage", `<p class="hint">Intel (15 res): reveals true stats for 5 months. Sabotage (25 res): chance to damage their forces, risk of blowback. Choosing starts a cooldown.</p><div class="target-list">${rows}</div>`);
+    wireClose(host);
+    host.querySelectorAll(".target-row").forEach(row=>{
+      row.onclick = () => { const t = game.countries[row.dataset.country]; if(!t){ renderDrawer(); return; } renderSpyMode(host, t); };
+    });
+    return;
+  }
+
+  if(drawerMode==="nuke"){
+    if(p.units.nukes < 1){
+      host.innerHTML = drawerWrap("Nuclear strike", `<p class="hint">You have no nuclear weapons. Research Nuclear Program, then build one (150 resources each).</p>`);
+      wireClose(host); return;
+    }
+    const candidates = Object.values(game.countries).filter(c=>c!==p);
+    const rows = candidates.map(c=>{
+      const reachable = game.canReachWithNuke(p, c);
+      return `<div class="target-row ${reachable?'':'disabled'}" data-country="${esc(c.name)}"><span class="l">${c.flag} ${esc(c.name)}</span><span class="r">${reachable?'in range':'out of range'}</span></div>`;
+    }).join("");
+    host.innerHTML = drawerWrap("☢ Launch a nuclear strike", `<p class="hint" style="color:var(--red)">This will devastate the target and turn the world against you. Choose carefully.</p><div class="target-list">${rows}</div>`);
+    wireClose(host);
+    host.querySelectorAll(".target-row:not(.disabled)").forEach(row=>{
+      row.onclick = () => {
+        const target = game.countries[row.dataset.country]; if(!target){ renderDrawer(); return; }
+        askConfirm(`Launch a nuclear strike on ${target.name}? This cannot be undone.`, () => {
+          game.useNuke(p, target, true, pushLog);
+          drawerMode = null; afterPlayerAction();
+        });
+      };
+    });
+    return;
+  }
+}
+
+function costFor(type){
+  const p = game.player;
+  let per = BUILD_COSTS[type];
+  if(type==="infantry" && p.hasTech("motorized_infantry")) per = Math.max(1, per-1);
+  if(type==="navy" && p.hasTech("naval_engineering")) per = Math.max(1, per-1);
+  return per;
+}
+
+function renderTerritoryPick(host, target, opts){
+  host.innerHTML = drawerWrap(`Attack ${target.name} — choose a territory`, `
+    <div class="target-list">
+      ${opts.map(o=>`<div class="target-row" data-t="${esc(o.territory)}"><span class="l">${esc(o.territory)}</span><span class="r">${o.overseas?'navy needed':'adjacent'}</span></div>`).join("")}
+    </div>
+    <div class="row-inline" style="margin-top:10px;"><button class="btn ghost" id="d-back">Back</button></div>
+  `);
+  host.querySelector("#d-back").onclick = renderDrawer;
+  host.querySelectorAll(".target-row").forEach(row=>{
+    row.onclick = () => {
+      const o = opts.find(x=>x.territory===row.dataset.t);
+      confirmAndAttack(target, o);
+    };
+  });
+}
+
+function confirmAndAttack(target, opt){
+  const p = game.player;
+  const go = () => {
+    game.resolveAttack(p, target, opt.territory, opt.overseas, true, pushLog);
+    drawerMode = null;
+    afterPlayerAction();
+  };
+  const pactStep = () => {
+    if(game.hasPact(p.name, target.name)) askConfirm(`You have a non-aggression pact with ${target.name}. Break it and attack?`, go);
+    else go();
+  };
+  if(p.allies.has(target.name)) askConfirm(`${target.name} is your ALLY. Betray them and attack?`, pactStep);
+  else pactStep();
+}
+
+function renderContinentConfirm(host, continentName, targets){
+  const multiplier = game.offensivePower(targets.length);
+  const rows = targets.map(({target, territory, overseas})=>
+    `<div class="target-row" style="cursor:default;">
+      <span class="l">${target.flag} ${esc(territory)} <span style="color:var(--muted)">(held by ${esc(target.name)})</span></span>
+      <span class="r">${overseas?'navy needed':'adjacent'}</span>
+    </div>`
+  ).join("");
+  host.innerHTML = drawerWrap(`Continental offensive — ${esc(continentName)}`, `
+    <p class="hint" style="color:var(--red)">This will strike ${targets.length} territories at once, each attack at about
+      ${(multiplier*100).toFixed(0)}% power (allies and pact partners are already excluded).</p>
+    <div class="target-list">${rows}</div>
+    <div class="row-inline" style="margin-top:12px;">
+      <button class="btn danger" id="c-go">Launch offensive</button>
+      <button class="btn ghost" id="c-back">Back</button>
+    </div>
+  `);
+  wireClose(host);
+  host.querySelector("#c-back").onclick = renderDrawer;
+  host.querySelector("#c-go").onclick = () => {
+    game.continentalOffensive(game.player, continentName, pushLog);
+    drawerMode = null;
+    afterPlayerAction();
+  };
+}
+
+function renderSpyMode(host, target){
+  host.innerHTML = drawerWrap(`Espionage — ${target.name}`, `
+    <div class="row-inline">
+      <button class="btn" id="s-intel">Gather intel (15 res)</button>
+      <button class="btn danger" id="s-sabotage">Sabotage (25 res)</button>
+      <button class="btn ghost" id="d-back">Back</button>
+    </div>
+  `);
+  host.querySelector("#d-back").onclick = renderDrawer;
+  const p = game.player;
+  const cyberBonus = p.hasTech("cyber_warfare") ? 0.15 : 0;
+  host.querySelector("#s-intel").onclick = () => {
+    if(p.resources < 15){ pushLog("Not enough resources (need 15).", "bad"); renderGame(); return; }
+    p.resources -= 15;
+    if(Math.random() < 0.85+cyberBonus){
+      game.playerIntel[target.name] = game.turn;
+      pushLog(`🕵 Espionage successful — ${target.name}'s stats revealed for 5 months (res ${target.resources}, mil ${target.military}).`, "good");
+    } else {
+      pushLog("Your spies were caught and yielded nothing useful.", "warn");
+    }
+    drawerMode = null; afterPlayerAction();
+  };
+  host.querySelector("#s-sabotage").onclick = () => {
+    if(p.resources < 25){ pushLog("Not enough resources (need 25).", "bad"); renderGame(); return; }
+    p.resources -= 25;
+    if(Math.random() < 0.55+cyberBonus){
+      const loss = rand(0.1,0.2);
+      target.applyLosses(loss);
+      target.resources = Math.max(0, Math.floor(target.resources*0.85));
+      pushLog(`🕵 Sabotage successful — ${target.name}'s forces and resources take a hit.`, "good");
+    } else {
+      game.addGrudge(target.name, p.name, 30);
+      pushLog(`❌ Sabotage failed and was traced back to you! ${target.name} is furious.`, "bad");
+    }
+    drawerMode = null; afterPlayerAction();
+  };
+}
+
+function drawerWrap(title, inner){
+  return `<div class="drawer"><h3>${esc(title)}</h3>${inner}
+    <div class="row-inline" style="margin-top:10px;"><button class="btn ghost" id="d-close2">Cancel</button></div>
+  </div>`;
+}
+function wireClose(host){
+  const btn = host.querySelector("#d-close2") || host.querySelector("#d-close");
+  if(btn) btn.onclick = closeDrawer;
+}
+
+/* ---------- End screen ---------- */
+
+function renderEnd(outcome){
+  stopClock();
+  const p = game.player;
+  localStorage.removeItem(SAVE_KEY);
+  let title, cls, body;
+  if(outcome==="defeat"){
+    title = "💀 Your nation has fallen"; cls = "lose";
+    body = `${p ? p.name : "Your nation"} was conquered on ${game.dateString()}. The world moves on without you.`;
+  } else if(outcome==="conquest"){
+    title = `🏆 ${p.flag} ${p.name} rules the world`; cls = "win";
+    body = Object.keys(game.countries).length===1
+      ? `Every other nation has fallen or been absorbed. Total conquest, ${game.whenText()}.`
+      : `You held ${Math.round(CONQUEST_SHARE*100)}%+ of the world's territory for ${CONQUEST_STREAK_NEEDED} ${STREAK_UNIT} running. World conquest achieved.`;
+  } else if(outcome==="economic"){
+    title = `🏆 Economic victory for ${p.name}`; cls = "win";
+    body = `You sustained ${ECONOMIC_VICTORY_RESOURCES}+ resources for ${ECON_STREAK_NEEDED} ${STREAK_UNIT} running — the world's undisputed economic power.`;
+  } else if(outcome==="alliance"){
+    title = `🏆 Alliance victory for ${p.name}`; cls = "win";
+    body = `You and your allies came to control ${Math.round(ALLIANCE_DOMINANCE_PCT*100)}%+ of the world's territory for ${ALLIANCE_STREAK_NEEDED} ${STREAK_UNIT} running.`;
+  } else if(outcome==="superpower"){
+    title = `🏆 ${p.flag} ${p.name} is the world's superpower`; cls = "win";
+    body = `Your power stood ${SUPERPOWER_MARGIN}× above every rival for ${SUPERPOWER_STREAK_NEEDED} ${STREAK_UNIT} running.`;
+  } else if(outcome==="technology"){
+    title = `🏆 Technological supremacy for ${p.name}`; cls = "win";
+    body = `You have researched all ${Object.keys(TECH_TREE).length} technologies, ${game.whenText()}.`;
+  } else if(outcome==="formation"){
+    const f = FORMABLES.find(x=>x.id===game.objective.formableId);
+    title = `🏆 ${f ? f.flag+" The "+f.name : "A new nation"} is proclaimed`; cls = "win";
+    body = `You gathered every required territory and proclaimed the ${f ? f.name : "nation"}, ${game.whenText()}.`;
+  } else if(outcome==="survived"){
+    title = `🏆 ${p.flag} ${p.name} survived`; cls = "win";
+    body = `${game.limitText()} and your nation still stands.`;
+  } else {
+    const ranked = Object.values(game.countries).sort((a,b)=>b.powerScore-a.powerScore);
+    const winner = ranked[0];
+    const rank = ranked.indexOf(p) + 1;
+    if(winner===p){ title = `🏆 Time's up — ${p.name} leads the world`; cls="win"; body = `${game.maxYears} years have passed (${game.dateString()}). Final power score ${p.powerScore.toFixed(1)} — the highest of any surviving nation.`; }
+    else { title = `⏰ Time's up`; cls="lose"; body = `${game.maxYears} years have passed (${game.dateString()}). ${winner.flag} ${winner.name} ends the game as the leading power. You finished rank ${rank} of ${ranked.length}.`; }
+  }
+
+  app.innerHTML = `
+    <div class="banner"><h1>World Conqueror</h1><div class="byline">Made by Reedman27</div></div>
+    <div class="panel end-screen">
+      <div class="big ${cls}">${title}</div>
+      <p>${esc(body)}</p>
+      <button class="btn" id="btn-new">Start a new game</button>
+    </div>
+    <div class="panel" style="margin-top:16px;">
+      <h2>Dispatches</h2>
+      <div class="log" id="log-box">${renderLogHTML()}</div>
+    </div>
+    <p class="credit">World Conqueror · made by <b>Reedman27</b> · <a href="https://github.com/Reedman27/World-conquer" target="_blank" rel="noopener" style="color:inherit">github.com/Reedman27/World-conquer</a></p>
+  `;
+  document.getElementById("btn-new").onclick = () => { game = null; stopClock(); render(); };
+  scrollLogToBottom();
+}
+
+/* ---------- Quality of life (real-time) ---------- */
+let pausedByHide = null;
+document.addEventListener("visibilitychange", () => {
+  if(!game || !document.getElementById("clock-line")) return;
+  if(document.hidden){
+    if(speedIdx !== 0){ pausedByHide = speedIdx; setSpeed(0); }
+  } else if(pausedByHide !== null){
+    const back = pausedByHide; pausedByHide = null; setSpeed(back);
+  }
+});
+window.addEventListener("beforeunload", () => { try{ if(game && document.getElementById("clock-line")) autosave(); }catch(e){} });
+let lastRunSpeed = 1;
+document.addEventListener("keydown", e => {
+  if(!game || e.ctrlKey || e.metaKey || e.altKey) return;
+  if(!document.getElementById("clock-line") || blocking > 0 || document.querySelector(".overlay")) return;
+  const t = e.target && e.target.tagName;
+  if(t === "INPUT" || t === "SELECT" || t === "TEXTAREA") return;
+  if(e.code === "Space"){
+    e.preventDefault();
+    if(speedIdx === 0) setSpeed(lastRunSpeed || 1); else { lastRunSpeed = speedIdx; setSpeed(0); }
+  } else if(e.key >= "1" && e.key <= "4"){
+    lastRunSpeed = parseInt(e.key, 10); setSpeed(lastRunSpeed);
+  } else if(e.key === "Escape" && drawerMode){
+    closeDrawer();
+  }
+});
+
+render();
+})();
+</script>
+</body>
+</html>

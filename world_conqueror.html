@@ -1,9 +1,15 @@
+<!--
+  World Conqueror — made by Reedman27
+  https://github.com/Reedman27/World-conquer
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="author" content="Reedman27">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>World Conqueror</title>
+<title>World Conqueror — by Reedman27</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;500;600;700&family=Spectral+SC:wght@600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -259,6 +265,10 @@
   .end-screen p{ color:var(--text-dim); max-width:50ch; margin:0 auto 22px; }
 
   .footer-note{ color:var(--muted); font-size:11px; margin-top:26px; text-align:center; }
+
+  .byline{ font-family:var(--font-mono); font-size:11px; letter-spacing:.08em; color:var(--accent-dim); margin:2px 0 4px; text-transform:uppercase; }
+  .credit{ color:var(--muted); font-size:11px; margin-top:26px; text-align:center; font-family:var(--font-mono); }
+  .credit b{ color:var(--accent); font-weight:600; }
 </style>
 </head>
 <body>
@@ -509,13 +519,32 @@ const ECON_STREAK_NEEDED = 3;
 const ALLIANCE_DOMINANCE_PCT = 0.60;
 const ALLIANCE_STREAK_NEEDED = 3;
 
+const CONQUEST_SHARE = 0.5;              // World Conquest: hold this share of all territory...
+const CONQUEST_STREAK_NEEDED = 2;      // ...for this many turns running
+const SUPERPOWER_MARGIN = 1.3;           // Superpower: power score at least this many times the runner-up...
+const SUPERPOWER_STREAK_NEEDED = 3;    // ...for this many turns running
+const STREAK_UNIT = "turns";
+const OBJ_STREAK = {conquest:CONQUEST_STREAK_NEEDED, economic:ECON_STREAK_NEEDED, alliance:ALLIANCE_STREAK_NEEDED, superpower:SUPERPOWER_STREAK_NEEDED};
+
+/* How you choose to win. Only the chosen objective (plus total conquest) ends the game in victory. */
+const OBJECTIVES = {
+  conquest:   {icon:"🌍", name:"World Conquest",   desc:`Hold ${Math.round(CONQUEST_SHARE*100)}% of the world's territory for ${CONQUEST_STREAK_NEEDED} ${STREAK_UNIT}.`},
+  economic:   {icon:"💰", name:"Economic Power",   desc:`Sit on ${ECONOMIC_VICTORY_RESOURCES}+ resources for ${ECON_STREAK_NEEDED} ${STREAK_UNIT}.`},
+  alliance:   {icon:"🤝", name:"Grand Alliance",   desc:`You and your allies hold ${Math.round(ALLIANCE_DOMINANCE_PCT*100)}% of the world for ${ALLIANCE_STREAK_NEEDED} ${STREAK_UNIT}.`},
+  formation:  {icon:"🏴", name:"Nation Builder",   desc:"Proclaim one specific formable nation (you pick which)."},
+  technology: {icon:"🔬", name:"Tech Supremacy",   desc:"Research every technology in the tree."},
+  superpower: {icon:"👑", name:"Superpower",       desc:`Be the #1 power, ${SUPERPOWER_MARGIN}× the runner-up, for ${SUPERPOWER_STREAK_NEEDED} ${STREAK_UNIT}.`},
+  survival:   {icon:"🛡", name:"Survival",         desc:"Still be standing when the clock runs out."},
+  sandbox:    {icon:"🧭", name:"Sandbox",          desc:"No win condition. Play your own way."},
+};
+
 const DIFFICULTIES = {
   easy:   {aiAggression:0.7,  bonus:40,  label:"Easy",   desc:"Cautious rivals, +40 starting resources."},
   normal: {aiAggression:1.0,  bonus:0,   label:"Normal",  desc:"Balanced rivals, standard economy."},
   hard:   {aiAggression:1.35, bonus:-20, label:"Hard",    desc:"Aggressive rivals, -20 starting resources."},
 };
 
-const SAVE_KEY = "world_conqueror_turnbased_save_v3";
+const SAVE_KEY = "world_conqueror_turnbased_save_v4";
 
 /* ============================== HELPERS ============================== */
 
@@ -731,8 +760,9 @@ class Game {
     this.pacts = {};      // pairKey -> expiry turn
     this.grudges = {};    // holder -> {target: points}
     this.playerIntel = {}; // target -> turn last spied
-    this.econStreak = 0;
-    this.allianceStreak = 0;
+    this.objective = {id:"conquest", formableId:null};
+    this.objStreak = 0;          // consecutive turns/months the objective condition has held
+    this.objectiveDone = false;
     this.ended = null;
     this.history = [];       // [{turn, text}]
     this.formed = new Set();      // ids of formable nations already proclaimed
@@ -747,8 +777,10 @@ class Game {
   hasPact(a,b){ return pairKey(a,b) in this.pacts; }
   logHistory(text){ this.history.push({turn:this.turn, text}); }
 
-  setup(countryName, difficulty, maxTurns){
+  setup(countryName, difficulty, maxTurns, objective){
     this.difficulty = difficulty;
+    this.objective = {id: (objective && objective.id) || "conquest", formableId: (objective && objective.formableId) || null};
+    this.objStreak = 0; this.objectiveDone = false;
     this.maxTurns = clamp(maxTurns || MAX_TURNS, 10, 200);
     nukeCap = nukeCapFor(this.maxTurns);
     this.countries = {};
@@ -1113,6 +1145,7 @@ class Game {
     const oldName = country.name;
     this.renameCountry(country, f.name, f.short, f.flag);
     this.formed.add(f.id);
+    if(country===this.player && this.objective.id==="formation" && f.id===this.objective.formableId) this.objectiveDone = true;
     const n = f.needs.length;
     country.stability = Math.min(100, country.stability + 10);
     country.resources += 25*n;
@@ -1139,7 +1172,10 @@ class Game {
         }
         continue;
       }
-      for(const f of list){ if(this.canForm(c,f)){ this.form(c,f,log); break; } }
+      for(const f of list){
+        if(this.objective.id==="formation" && f.id===this.objective.formableId) continue;   // never snatch the player's goal
+        if(this.canForm(c,f)){ this.form(c,f,log); break; }
+      }
     }
   }
 
@@ -1154,21 +1190,55 @@ class Game {
     log(`📰 ${title} — ${template.replace("{n}", `${country.flag} ${country.name}`)}`, "note");
   }
 
-  /* Advance the "for N turns running" counters. Call exactly once per turn (checkVictory is
-     called from several places and must not mutate state, or streaks would tick several times a turn). */
+  /* Advance the objective's "held for N turns/months" counter. Call exactly once per turn/month
+     (checkVictory is called from several places and must not mutate state). */
+  territoryShares(){
+    const totalT = Object.values(this.countries).reduce((s,c)=>s+c.territory.size,0) || 1;
+    const mine = this.player.territory.size;
+    const withAllies = mine + [...this.player.allies].reduce((s,a)=> this.countries[a] ? s+this.countries[a].territory.size : s, 0);
+    return {mine: mine/totalT, withAllies: withAllies/totalT};
+  }
+  bestRivalPower(){
+    const others = Object.values(this.countries).filter(c=>c!==this.player).map(c=>c.powerScore);
+    return others.length ? Math.max(...others) : 0;
+  }
   updateStreaks(){
     if(!(this.player.name in this.countries)) return;
-    if(this.player.resources >= ECONOMIC_VICTORY_RESOURCES) this.econStreak++; else this.econStreak = 0;
-    const totalT = Object.values(this.countries).reduce((s,c)=>s+c.territory.size,0);
-    const myT = this.player.territory.size + [...this.player.allies].reduce((s,a)=> this.countries[a] ? s+this.countries[a].territory.size : s, 0);
-    if(totalT && myT/totalT >= ALLIANCE_DOMINANCE_PCT) this.allianceStreak++; else this.allianceStreak = 0;
+    const o = this.objective.id, sh = this.territoryShares();
+    let ok = false;
+    if(o==="conquest") ok = sh.mine >= CONQUEST_SHARE;
+    else if(o==="economic") ok = this.player.resources >= ECONOMIC_VICTORY_RESOURCES;
+    else if(o==="alliance") ok = sh.withAllies >= ALLIANCE_DOMINANCE_PCT;
+    else if(o==="superpower") ok = this.player.powerScore >= this.bestRivalPower()*SUPERPOWER_MARGIN;
+    this.objStreak = ok ? this.objStreak+1 : 0;
+  }
+  limitText(){ return `Turn ${this.maxTurns} reached`; }
+  whenText(){ return `on turn ${this.turn}`; }
+  objectiveProgress(){
+    const o = this.objective.id, p = this.player, need = OBJ_STREAK[o];
+    const sh = this.territoryShares(), pct = x => `${(x*100).toFixed(0)}%`;
+    const streak = need ? ` · held ${this.objStreak}/${need} ${STREAK_UNIT}` : "";
+    if(o==="conquest") return `🌍 World Conquest: ${pct(sh.mine)} of the ${pct(CONQUEST_SHARE)} needed${streak}`;
+    if(o==="economic") return `💰 Economic: ${fmt(p.resources)} / ${fmt(ECONOMIC_VICTORY_RESOURCES)} resources${streak}`;
+    if(o==="alliance") return `🤝 Alliance: ${pct(sh.withAllies)} of the ${pct(ALLIANCE_DOMINANCE_PCT)} needed${streak}`;
+    if(o==="superpower") return `👑 Superpower: power ${p.powerScore.toFixed(0)} vs rival ${this.bestRivalPower().toFixed(0)} (need ×${SUPERPOWER_MARGIN})${streak}`;
+    if(o==="technology") return `🔬 Tech Supremacy: ${p.researched.size}/${Object.keys(TECH_TREE).length} researched`;
+    if(o==="formation"){
+      const f = FORMABLES.find(x=>x.id===this.objective.formableId);
+      if(!f) return "🏴 Nation Builder";
+      return `🏴 ${f.name}: ${this.formableProgress(p,f).have.length}/${f.needs.length} territories`;
+    }
+    if(o==="survival") return `🛡 Survival: ${`${Math.max(0, this.maxTurns - this.turn + 1)} turns left`}`;
+    return "🧭 Sandbox: no win condition";
   }
   checkVictory(){
     if(!(this.player.name in this.countries)) return "defeat";
     if(Object.keys(this.countries).length===1) return "conquest";
-    if(this.econStreak >= ECON_STREAK_NEEDED) return "economic";
-    if(this.allianceStreak >= ALLIANCE_STREAK_NEEDED) return "alliance";
-    if(this.turn > this.maxTurns) return "turnlimit";
+    const o = this.objective.id;
+    if(OBJ_STREAK[o] && this.objStreak >= OBJ_STREAK[o]) return o;
+    if(o==="technology" && this.player.researched.size >= Object.keys(TECH_TREE).length) return "technology";
+    if(o==="formation" && this.objectiveDone) return "formation";
+    if(this.turn > this.maxTurns) return o==="survival" ? "survived" : "turnlimit";
     return null;
   }
 
@@ -1269,7 +1339,7 @@ class Game {
       history:this.history, eventCooldowns:this.eventCooldowns, formed:[...this.formed],
       countries: Object.fromEntries(Object.entries(this.countries).map(([n,c])=>[n,c.toJSON()])),
       pacts:this.pacts, grudges:this.grudges, playerIntel:this.playerIntel,
-      econStreak:this.econStreak, allianceStreak:this.allianceStreak,
+      objective:this.objective, objStreak:this.objStreak, objectiveDone:this.objectiveDone,
     };
   }
   static fromJSON(d){
@@ -1282,7 +1352,7 @@ class Game {
     g.countries = Object.fromEntries(Object.entries(d.countries).map(([n,c])=>[n,Country.fromJSON(c)]));
     g.player = g.countries[d.playerName];
     g.pacts = d.pacts; g.grudges = d.grudges; g.playerIntel = d.playerIntel;
-    g.econStreak = d.econStreak; g.allianceStreak = d.allianceStreak;
+    g.objective = d.objective || {id:"sandbox", formableId:null}; g.objStreak = d.objStreak || 0; g.objectiveDone = !!d.objectiveDone;
     return g;
   }
 }
@@ -1310,13 +1380,15 @@ function render(){
 
 /* ---------- Setup screen ---------- */
 let setupDifficulty = "normal";
+let setupObjective = "conquest";
+let setupFormable = "ussr";
 let setupMaxTurns = MAX_TURNS;
 
 function renderSetup(){
   const savedRaw = localStorage.getItem(SAVE_KEY);
   app.innerHTML = `
     <div class="banner">
-      <h1>World Conqueror</h1>
+      <h1>World Conqueror</h1><div class="byline">Made by Reedman27</div>
       <div class="sub">geography · diplomacy · espionage · the bomb</div>
     </div>
     <p class="lede">Pick a nation and steer it through a run of conquest,
@@ -1334,6 +1406,20 @@ function renderSetup(){
         </div>
       </div>
     ` : ``}
+
+    <p class="section-label">How do you want to win?</p>
+    <div class="diff-row" id="obj-row" style="margin-bottom:12px;">
+      ${Object.entries(OBJECTIVES).map(([key,o])=>`
+        <button class="diff-btn ${key===setupObjective?'selected':''}" data-obj="${key}">
+          <span class="name">${o.icon} ${o.name}</span>
+          <span class="desc">${o.desc}</span>
+        </button>
+      `).join("")}
+    </div>
+    ${setupObjective==="formation" ? `<div class="row-inline" style="margin:0 0 24px;">
+      <span style="color:var(--text-dim); font-size:12.5px;">Nation to build:</span>
+      <select id="form-target">${FORMABLES.map(f=>`<option value="${f.id}" ${f.id===setupFormable?'selected':''}>${f.flag} ${f.name} (${f.needs.length} territories)</option>`).join("")}</select>
+    </div>` : `<div style="height:16px;"></div>`}
 
     <p class="section-label">Difficulty</p>
     <div class="diff-row" id="diff-row">
@@ -1362,7 +1448,7 @@ function renderSetup(){
         </button>
       `).join("")}
     </div>
-    <p class="footer-note">Ported from a Python original (world_conqueror.py) into a browser game.</p>
+    <p class="credit">World Conqueror · made by <b>Reedman27</b> · <a href="https://github.com/Reedman27/World-conquer" target="_blank" rel="noopener" style="color:inherit">github.com/Reedman27/World-conquer</a></p>
   `;
 
   if(savedRaw){
@@ -1379,15 +1465,22 @@ function renderSetup(){
     document.getElementById("btn-discard").onclick = () => { localStorage.removeItem(SAVE_KEY); render(); };
   }
 
-  document.querySelectorAll(".diff-btn").forEach(btn=>{
+  document.querySelectorAll("#diff-row .diff-btn").forEach(btn=>{
     btn.onclick = () => { setupDifficulty = btn.dataset.diff; renderSetup(); };
   });
+  document.querySelectorAll("#obj-row .diff-btn").forEach(btn=>{
+    btn.onclick = () => { setupObjective = btn.dataset.obj; renderSetup(); };
+  });
+  const formSel = document.getElementById("form-target");
+  if(formSel) formSel.onchange = () => { setupFormable = formSel.value; };
   const turnLimitInput = document.getElementById("turn-limit");
+  turnLimitInput.oninput = () => { setupMaxTurns = parseInt(turnLimitInput.value, 10) || MAX_TURNS; };
   document.querySelectorAll(".country-card").forEach(btn=>{
     btn.onclick = () => {
       setupMaxTurns = parseInt(turnLimitInput.value, 10) || MAX_TURNS;
       game = new Game();
-      game.setup(btn.dataset.country, setupDifficulty, setupMaxTurns);
+      const objective = {id:setupObjective, formableId: setupObjective==="formation" ? setupFormable : null};
+      game.setup(btn.dataset.country, setupDifficulty, setupMaxTurns, objective);
       logBuffer = [];
       drawerMode = null;
       beginTurn();
@@ -1570,7 +1663,7 @@ function renderGame(){
 
   app.innerHTML = `
     <div class="banner">
-      <h1>World Conqueror</h1>
+      <h1>World Conqueror</h1><div class="byline">Made by Reedman27</div>
       <div class="turnbox">Turn <b>${game.turn}</b> / ${game.maxTurns} &nbsp;·&nbsp; ${DIFFICULTIES[game.difficulty].label} &nbsp;·&nbsp; ${p.flag} ${esc(p.name)}</div>
     </div>
     <div class="game-grid">
@@ -1592,6 +1685,7 @@ function renderGame(){
             <tr><td>Research</td><td>${p.researchPoints.toFixed(1)} RP<br><span style="color:var(--muted)">${esc(techs)}</span></td></tr>
             <tr><td>Power score</td><td>${p.powerScore.toFixed(1)}</td></tr>
             <tr><td>World share</td><td>${(myShare*100).toFixed(1)}%</td></tr>
+            <tr><td>Objective</td><td>${esc(game.objectiveProgress())}</td></tr>
             <tr><td>Nations left</td><td>${Object.keys(game.countries).length}</td></tr>
           </table>
         </div>
@@ -1636,6 +1730,7 @@ function renderGame(){
         <div id="drawer-slot"></div>
       </div>
     </div>
+      <p class="credit">World Conqueror · made by <b>Reedman27</b> · <a href="https://github.com/Reedman27/World-conquer" target="_blank" rel="noopener" style="color:inherit">github.com/Reedman27/World-conquer</a></p>
   `;
 
   function actionButton(id, icon, label){
@@ -1947,7 +2042,7 @@ function renderDrawer(){
         + (prog.missing.length>6 ? ` +${prog.missing.length-6} more` : "");
       const status = done ? "proclaimed" : (ok ? "FORM" : `${prog.have.length}/${f.needs.length}`);
       return `<div class="target-row ${ok?'':'disabled'}" data-f="${f.id}">
-        <span class="l">${f.flag} ${esc(f.name)}<br><span style="color:var(--muted); font-size:11px;">${done ? 'Already proclaimed' : (ok ? 'You hold every required territory' : 'Missing: '+missing)}</span></span>
+        <span class="l">${game.objective.id==="formation" && game.objective.formableId===f.id ? "⭐ " : ""}${f.flag} ${esc(f.name)}<br><span style="color:var(--muted); font-size:11px;">${done ? 'Already proclaimed' : (ok ? 'You hold every required territory' : 'Missing: '+missing)}</span></span>
         <span class="r">${status}</span>
       </div>`;
     }).join("");
@@ -2182,13 +2277,28 @@ function renderEnd(outcome){
     body = `${p ? p.name : "Your nation"} was conquered before turn ${game.maxTurns}. The world moves on without you.`;
   } else if(outcome==="conquest"){
     title = `🏆 ${p.flag} ${p.name} rules the world`; cls = "win";
-    body = `Every other nation has fallen or been absorbed. Total conquest, on turn ${game.turn}.`;
+    body = Object.keys(game.countries).length===1
+      ? `Every other nation has fallen or been absorbed. Total conquest, ${game.whenText()}.`
+      : `You held ${Math.round(CONQUEST_SHARE*100)}%+ of the world's territory for ${CONQUEST_STREAK_NEEDED} ${STREAK_UNIT} running. World conquest achieved.`;
   } else if(outcome==="economic"){
     title = `🏆 Economic victory for ${p.name}`; cls = "win";
-    body = `You sustained ${ECONOMIC_VICTORY_RESOURCES}+ resources for ${ECON_STREAK_NEEDED} turns running — the world's undisputed economic power.`;
+    body = `You sustained ${ECONOMIC_VICTORY_RESOURCES}+ resources for ${ECON_STREAK_NEEDED} ${STREAK_UNIT} running — the world's undisputed economic power.`;
   } else if(outcome==="alliance"){
     title = `🏆 Alliance victory for ${p.name}`; cls = "win";
-    body = `You and your allies came to control ${Math.round(ALLIANCE_DOMINANCE_PCT*100)}%+ of the world's territory for ${ALLIANCE_STREAK_NEEDED} turns running.`;
+    body = `You and your allies came to control ${Math.round(ALLIANCE_DOMINANCE_PCT*100)}%+ of the world's territory for ${ALLIANCE_STREAK_NEEDED} ${STREAK_UNIT} running.`;
+  } else if(outcome==="superpower"){
+    title = `🏆 ${p.flag} ${p.name} is the world's superpower`; cls = "win";
+    body = `Your power stood ${SUPERPOWER_MARGIN}× above every rival for ${SUPERPOWER_STREAK_NEEDED} ${STREAK_UNIT} running.`;
+  } else if(outcome==="technology"){
+    title = `🏆 Technological supremacy for ${p.name}`; cls = "win";
+    body = `You have researched all ${Object.keys(TECH_TREE).length} technologies, ${game.whenText()}.`;
+  } else if(outcome==="formation"){
+    const f = FORMABLES.find(x=>x.id===game.objective.formableId);
+    title = `🏆 ${f ? f.flag+" The "+f.name : "A new nation"} is proclaimed`; cls = "win";
+    body = `You gathered every required territory and proclaimed the ${f ? f.name : "nation"}, ${game.whenText()}.`;
+  } else if(outcome==="survived"){
+    title = `🏆 ${p.flag} ${p.name} survived`; cls = "win";
+    body = `${game.limitText()} and your nation still stands.`;
   } else {
     const ranked = Object.values(game.countries).sort((a,b)=>b.powerScore-a.powerScore);
     const winner = ranked[0];
@@ -2198,7 +2308,7 @@ function renderEnd(outcome){
   }
 
   app.innerHTML = `
-    <div class="banner"><h1>World Conqueror</h1></div>
+    <div class="banner"><h1>World Conqueror</h1><div class="byline">Made by Reedman27</div></div>
     <div class="panel end-screen">
       <div class="big ${cls}">${title}</div>
       <p>${esc(body)}</p>
@@ -2208,6 +2318,7 @@ function renderEnd(outcome){
       <h2>Dispatches</h2>
       <div class="log" id="log-box">${renderLogHTML()}</div>
     </div>
+    <p class="credit">World Conqueror · made by <b>Reedman27</b> · <a href="https://github.com/Reedman27/World-conquer" target="_blank" rel="noopener" style="color:inherit">github.com/Reedman27/World-conquer</a></p>
   `;
   document.getElementById("btn-new").onclick = () => { game = null; render(); };
   scrollLogToBottom();
